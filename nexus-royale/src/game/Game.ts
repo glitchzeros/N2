@@ -9,6 +9,8 @@ import { CharacterControllerSystem } from '@/game/systems/CharacterControllerSys
 import { MovementSystem } from '@/game/systems/MovementSystem';
 import { input } from '@/platform/web/Input';
 import { generateFlatShadedGrid } from '@/game/environment/terrain/TerrainGenerator';
+import { buildTerrainMesh } from '@/game/environment/terrain/TerrainMeshThree';
+import { createCameraSystem } from '@/game/systems/CameraSystem';
 
 export class Game {
   readonly world = new World();
@@ -21,7 +23,7 @@ export class Game {
     registerGameComponents(this.world);
     this.scheduler = new Scheduler({ world: this.world });
 
-    // Systems order: Input -> Character -> Movement
+    // Systems order: Input -> Character -> Movement -> Camera
     this.playerEntity = createPlayer(this.world);
     const inputSystem = createInputSystem(this.playerEntity, () => input.snapshot());
     this.scheduler.add(inputSystem);
@@ -31,8 +33,13 @@ export class Game {
     // Renderer
     this.renderer.init();
 
-    // Terrain stub (positions only) — actual mesh added later
-    generateFlatShadedGrid(64, 64, 1);
+    // Terrain mesh
+    const data = generateFlatShadedGrid(64, 64, 1);
+    const mesh = buildTerrainMesh(data);
+    this.renderer.getScene().add(mesh);
+
+    // Camera follow
+    this.scheduler.add(createCameraSystem(this.playerEntity, this.renderer));
 
     // Loop
     this.loop = new MainLoop({
