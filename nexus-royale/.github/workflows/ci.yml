@@ -18,3 +18,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test -- --coverage
       - run: npm run build
+      - name: Validate PWA files
+        run: |
+          test -f public/manifest.webmanifest
+          test -f public/sw.js
