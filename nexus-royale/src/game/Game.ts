@@ -11,6 +11,8 @@ import { input } from '@/platform/web/Input';
 import { generateFlatShadedGrid } from '@/game/environment/terrain/TerrainGenerator';
 import { buildTerrainMesh } from '@/game/environment/terrain/TerrainMeshThree';
 import { createCameraSystem } from '@/game/systems/CameraSystem';
+import { HUD } from '@/ui/screens/HUD';
+import { FrameProfilerOverlay } from '@/tools/profiler/FrameProfilerOverlay';
 
 export class Game {
   readonly world = new World();
@@ -18,6 +20,8 @@ export class Game {
   readonly scheduler: Scheduler;
   private readonly loop: MainLoop;
   private playerEntity: number = -1;
+  private readonly hud = new HUD();
+  private readonly profiler = new FrameProfilerOverlay();
 
   constructor() {
     registerGameComponents(this.world);
@@ -44,19 +48,32 @@ export class Game {
     // Loop
     this.loop = new MainLoop({
       update: (dt) => this.scheduler.update(dt),
-      render: () => this.renderer.render(),
+      render: () => {
+        const fps = this.profiler.tick();
+        const health = this.world.get<{ hp: number; max: number }>(this.playerEntity, 'Health');
+        if (health) this.hud.state.set({ health: health.hp, maxHealth: health.max, fps });
+        this.renderer.render();
+      },
       fixedDeltaSeconds: 1 / 60
     });
   }
 
   start(): void {
-    if (typeof window !== 'undefined') input.attach(window);
+    if (typeof window !== 'undefined') {
+      input.attach(window);
+      this.hud.mount(document.body);
+      this.profiler.mount(document.body);
+    }
     this.loop.start();
   }
 
   stop(): void {
     this.loop.stop();
-    if (typeof window !== 'undefined') input.detach(window);
+    if (typeof window !== 'undefined') {
+      input.detach(window);
+      this.hud.unmount();
+      this.profiler.unmount();
+    }
     this.renderer.dispose();
   }
 }
