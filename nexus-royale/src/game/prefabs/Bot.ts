@@ -1,5 +1,5 @@
 import type { World } from '@/engine/core/ecs/World';
-import type { Transform, Velocity, Health } from '@/game/components';
+import type { Transform, Velocity, Health, AIState } from '@/game/components';
 
 export function createBot(world: World, x = 5, z = 8): number {
   const e = world.createEntity();
@@ -7,5 +7,7 @@ export function createBot(world: World, x = 5, z = 8): number {
   world.add<Velocity>(e, 'Velocity', { vx: 0, vy: 0, vz: 0 });
   world.add<Health>(e, 'Health', { hp: 60, max: 60, alive: true });
   world.add(e, 'Bounds', { minX: x - 0.5, minY: 0, minZ: z - 0.5, maxX: x + 0.5, maxY: 2, maxZ: z + 0.5 });
+  world.add<AIState>(e, 'AIState', { targetEntity: null, mode: 'patrol', perceptionRange: 25 });
+  world.add(e, 'InputState', { moveX: 0, moveY: 0, lookX: 0, lookY: 0, fire: false });
   return e;
 }

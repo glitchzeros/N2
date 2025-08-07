@@ -17,6 +17,8 @@ import { createSpawnSystem } from '@/game/systems/SpawnSystem';
 import { createWeaponSystem } from '@/game/systems/WeaponSystem';
 import { KillFeed } from '@/ui/components/KillFeed';
 import { DamageNumbers } from '@/ui/components/DamageNumbers';
+import { createPerceptionSystem } from '@/game/ai/perception/Perception';
+import { createAISystem } from '@/game/systems/AISystem';
 
 export class Game {
   readonly world = new World();
@@ -39,6 +41,8 @@ export class Game {
     const inputSystem = createInputSystem(this.playerEntity, () => input.snapshot());
     this.scheduler.add(inputSystem);
     this.scheduler.add(createWeaponSystem(this.playerEntity));
+    this.scheduler.add(createPerceptionSystem());
+    this.scheduler.add(createAISystem());
     this.scheduler.add(CharacterControllerSystem);
     this.scheduler.add(MovementSystem);
 
