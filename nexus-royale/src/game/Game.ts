@@ -19,6 +19,8 @@ import { KillFeed } from '@/ui/components/KillFeed';
 import { DamageNumbers } from '@/ui/components/DamageNumbers';
 import { createPerceptionSystem } from '@/game/ai/perception/Perception';
 import { createAISystem } from '@/game/systems/AISystem';
+import { initRUM } from '@/config/monitoring/rum-client';
+import { initErrorTracking } from '@/config/monitoring/error-tracking';
 
 export class Game {
   readonly world = new World();
@@ -77,6 +79,8 @@ export class Game {
       this.profiler.mount(document.body);
       this.killFeed.mount(document.body);
       this.damageNumbers.mount(document.body);
+      initErrorTracking();
+      initRUM();
     }
     this.loop.start();
   }
