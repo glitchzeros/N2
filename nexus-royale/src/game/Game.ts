@@ -13,6 +13,10 @@ import { buildTerrainMesh } from '@/game/environment/terrain/TerrainMeshThree';
 import { createCameraSystem } from '@/game/systems/CameraSystem';
 import { HUD } from '@/ui/screens/HUD';
 import { FrameProfilerOverlay } from '@/tools/profiler/FrameProfilerOverlay';
+import { createSpawnSystem } from '@/game/systems/SpawnSystem';
+import { createWeaponSystem } from '@/game/systems/WeaponSystem';
+import { KillFeed } from '@/ui/components/KillFeed';
+import { DamageNumbers } from '@/ui/components/DamageNumbers';
 
 export class Game {
   readonly world = new World();
@@ -22,15 +26,19 @@ export class Game {
   private playerEntity: number = -1;
   private readonly hud = new HUD();
   private readonly profiler = new FrameProfilerOverlay();
+  private readonly killFeed = new KillFeed();
+  private readonly damageNumbers = new DamageNumbers();
 
   constructor() {
     registerGameComponents(this.world);
     this.scheduler = new Scheduler({ world: this.world });
 
-    // Systems order: Input -> Character -> Movement -> Camera
+    // Entities and systems
     this.playerEntity = createPlayer(this.world);
+    this.scheduler.add(createSpawnSystem(5));
     const inputSystem = createInputSystem(this.playerEntity, () => input.snapshot());
     this.scheduler.add(inputSystem);
+    this.scheduler.add(createWeaponSystem(this.playerEntity));
     this.scheduler.add(CharacterControllerSystem);
     this.scheduler.add(MovementSystem);
 
@@ -63,6 +71,8 @@ export class Game {
       input.attach(window);
       this.hud.mount(document.body);
       this.profiler.mount(document.body);
+      this.killFeed.mount(document.body);
+      this.damageNumbers.mount(document.body);
     }
     this.loop.start();
   }
@@ -73,6 +83,8 @@ export class Game {
       input.detach(window);
       this.hud.unmount();
       this.profiler.unmount();
+      this.killFeed.unmount();
+      this.damageNumbers.unmount();
     }
     this.renderer.dispose();
   }

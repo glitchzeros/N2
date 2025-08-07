@@ -3,6 +3,7 @@ import type { InputState, WeaponState } from '@/game/components';
 import { Vector3 } from '@/engine/core/math/Vector3';
 import { hitscan } from '@/game/weapons/ballistics/Hitscan';
 import { applyDamage } from '@/game/weapons/damage/DamageModel';
+import { eventBus } from '@/engine/core/events/EventBus';
 
 const DAMAGE = 12; // Pulse Rifle
 
@@ -23,12 +24,19 @@ export function createWeaponSystem(playerEntity: number): System {
       w.ammo -= 1;
       ctx.world.add(playerEntity, 'WeaponState', w);
 
-      // Simple straight forward ray along +Z from player
-      // In a real setup, use camera forward; here we assume looking along +Z
       const origin = new Vector3(0, 1.5, 0);
       const dir = new Vector3(0, 0, 1);
       const hit = hitscan(ctx.world, origin, dir, 100);
-      if (hit) applyDamage(ctx.world, hit.entity, DAMAGE);
+      if (hit) {
+        const target = hit.entity;
+        const before = ctx.world.get<{ hp: number; alive: boolean }>(target, 'Health');
+        eventBus.emit('hit', { target, amount: DAMAGE });
+        applyDamage(ctx.world, target, DAMAGE);
+        const after = ctx.world.get<{ hp: number; alive: boolean }>(target, 'Health');
+        if (before && after && before.alive && !after.alive) {
+          eventBus.emit('kill', { killer: playerEntity, victim: target });
+        }
+      }
     }
   };
 }
