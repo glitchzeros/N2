@@ -4,6 +4,7 @@ import { Vector3 } from '@/engine/core/math/Vector3';
 import { hitscan } from '@/game/weapons/ballistics/Hitscan';
 import { applyDamage } from '@/game/weapons/damage/DamageModel';
 import { eventBus } from '@/engine/core/events/EventBus';
+import { playPulseRifle } from '@/engine/audio/synthesis/Synth';
 
 const DAMAGE = 12; // Pulse Rifle
 
@@ -23,6 +24,7 @@ export function createWeaponSystem(playerEntity: number): System {
       w.cooldown = 1 / w.fireRate;
       w.ammo -= 1;
       ctx.world.add(playerEntity, 'WeaponState', w);
+      playPulseRifle();
 
       const origin = new Vector3(0, 1.5, 0);
       const dir = new Vector3(0, 0, 1);

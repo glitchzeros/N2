@@ -6,12 +6,39 @@ export type InputSnapshot = {
   fire: boolean;
 };
 
+export type InputMapping = {
+  left: string[];
+  right: string[];
+  forward: string[];
+  backward: string[];
+  fire: string[]; // additional keys besides mouse
+};
+
+export const defaultMapping: InputMapping = {
+  left: ['KeyA', 'ArrowLeft'],
+  right: ['KeyD', 'ArrowRight'],
+  forward: ['KeyW', 'ArrowUp'],
+  backward: ['KeyS', 'ArrowDown'],
+  fire: ['Space']
+};
+
+export function computeAxesFromKeys(keys: Set<string>, mapping: InputMapping): { x: number; y: number; fire: boolean } {
+  const x = (mapping.right.some(k => keys.has(k)) ? 1 : 0) + (mapping.left.some(k => keys.has(k)) ? -1 : 0);
+  const y = (mapping.forward.some(k => keys.has(k)) ? 1 : 0) + (mapping.backward.some(k => keys.has(k)) ? -1 : 0);
+  const fire = mapping.fire.some(k => keys.has(k));
+  return { x, y, fire };
+}
+
 export class Input {
   private keys = new Set<string>();
   private lookX = 0;
   private lookY = 0;
   private fireDown = false;
   private deadZone = 0.001;
+  private mapping: InputMapping = defaultMapping;
+
+  setMapping(mapping: InputMapping): void { this.mapping = mapping; }
+  getMapping(): InputMapping { return this.mapping; }
 
   attach(element: HTMLElement | Window = window): void {
     element.addEventListener('keydown', this.onKeyDown);
@@ -30,8 +57,9 @@ export class Input {
   }
 
   snapshot(): InputSnapshot {
-    const moveX = (this.keys.has('KeyD') ? 1 : 0) + (this.keys.has('KeyA') ? -1 : 0);
-    const moveY = (this.keys.has('KeyW') ? 1 : 0) + (this.keys.has('KeyS') ? -1 : 0);
+    const axes = computeAxesFromKeys(this.keys, this.mapping);
+    const moveX = axes.x;
+    const moveY = axes.y;
 
     const dx = Math.abs(this.lookX) < this.deadZone ? 0 : this.lookX;
     const dy = Math.abs(this.lookY) < this.deadZone ? 0 : this.lookY;
@@ -41,10 +69,9 @@ export class Input {
       moveY,
       lookDeltaX: dx,
       lookDeltaY: dy,
-      fire: this.fireDown,
+      fire: this.fireDown || axes.fire,
     };
 
-    // consume look deltas each snapshot
     this.lookX = 0; this.lookY = 0;
     return snap;
   }
