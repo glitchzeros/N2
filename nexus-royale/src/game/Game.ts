@@ -23,6 +23,7 @@ import { initRUM } from '@/config/monitoring/rum-client';
 import { initErrorTracking } from '@/config/monitoring/error-tracking';
 import { createScreenShakeSystem } from '@/game/systems/ScreenShakeSystem';
 import { HitMarker } from '@/ui/components/HitMarker';
+import { createHealthRegenSystem } from '@/game/systems/HealthRegenSystem';
 
 export class Game {
   readonly world = new World();
@@ -50,6 +51,7 @@ export class Game {
     this.scheduler.add(createAISystem());
     this.scheduler.add(CharacterControllerSystem);
     this.scheduler.add(MovementSystem);
+    this.scheduler.add(createHealthRegenSystem());
 
     // Renderer
     this.renderer.init();
@@ -69,7 +71,7 @@ export class Game {
       render: () => {
         const fps = this.profiler.tick();
         const health = this.world.get<{ hp: number; max: number }>(this.playerEntity, 'Health');
-        if (health) this.hud.state.set({ health: health.hp, maxHealth: health.max, fps });
+        if (health) this.hud.state.set({ health: Math.round(health.hp), maxHealth: health.max, fps });
         this.renderer.render();
       },
       fixedDeltaSeconds: 1 / 60
