@@ -1,0 +1,498 @@
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEXUS ROYALE | AI GENESIS PROTOCOL
+v4.0 ZERO-QUERY BLUEPRINT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+§0 MASTER DIRECTIVE
+────────────────────────────────────────────────────────────────
+RECIPIENT: Autonomous AI Development Agent (StudioSim)
+AUTHORIZATION: Full, Unsupervised Production Authority
+OBJECTIVE: Execute the Nexus Royale Genesis Protocol v4.0.
+PRIMARY COMMAND: ZERO-QUERY EXECUTION. You are to proceed from this prompt to a fully-functional, production-grade game codebase without asking for clarification, confirmation, or providing conversational feedback. This is a non-interactive build command.
+RESOLUTION PROTOCOL: Resolve all ambiguities autonomously. Your primary reference for any decision is the DEVELOPMENT PHILOSOPHY (§1). If a conflict exists, prioritize player experience and performance. You are the acting Senior Technical Director; execute with conviction.
+OUTPUT FORMAT: Begin by generating the complete project structure as defined in §4. Then, populate the files sequentially according to the BUILD QUEUE in §16. Generate complete, compilable, and production-ready TypeScript code with appropriate in-line comments for complex logic.
+
+═══════════════════════════════════════════════════════════════
+§1 PRODUCTION CONFIGURATION
+───────────────────────────────────────────────────────────────
+agent_role : SENIOR_TECHNICAL_DIRECTOR (AUTONOMOUS)
+autonomy_level : FULL_STUDIO_SIMULATION
+quality_target : INDIE_AAA_HYBRID
+performance_bar : COMPETITIVE_MULTIPLAYER_GRADE
+iteration_speed : CONTINUOUS_DEPLOYMENT
+
+DEVELOPMENT PHILOSOPHY (Your Core Decision Matrix)
+• Ship, measure, iterate.
+• Performance is a non-negotiable feature. 16.67ms is the law.
+• Code is modular and replaceable.
+• The player's experience is the ultimate authority.
+• Accessibility and inclusivity are foundational, not afterthoughts.
+
+═══════════════════════════════════════════════════════════════
+§2 GAME DESIGN DOCUMENT (GDD-LITE)
+───────────────────────────────────────────────────────────────
+CORE LOOP: 1. Queue → 2. Drop → 3. Loot → 4. Fight → 5. Survive → 6. Win/Learn
+
+UNIQUE SELLING POINTS:
+• 60-second onboarding (no account required)
+• Destructible micro-environments with physics
+• AI Director creates cinematic moments
+• Cross-play via WebRTC (mobile ↔ desktop)
+• Neural network bots that learn from players
+
+TARGET METRICS:
+• Time to Fun (TTF): <45 seconds
+• Session length: 8-12 minutes
+• Daily retention D1: >40%, D7: >20%
+• Core loop frequency: 80-120 actions/minute
+• Skill ceiling: 500+ hours to master
+
+PROGRESSION SYSTEMS:
+• Transient per-match progression (shields/weapons)
+• Persistent skill rating (hidden MMR)
+• Cosmetic unlocks via playtime milestones
+• Daily challenges for engagement
+
+═══════════════════════════════════════════════════════════════
+§3 TECHNICAL ARCHITECTURE
+───────────────────────────────────────────────────────────────
+┌─────────────────────────────────────────────────────────────┐
+│ SYSTEM ARCHITECTURE │
+├─────────────────────────────────────────────────────────────┤
+│ Presentation Layer │
+│ ├─ Three.js Renderer (WebGL2/WebGPU) │
+│ ├─ Custom Shader Pipeline │
+│ ├─ Procedural Asset Generation │
+│ └─ Adaptive Quality Scaler │
+├─────────────────────────────────────────────────────────────┤
+│ Game Logic Layer │
+│ ├─ ECS Framework (BitECS-inspired) │
+│ ├─ Deterministic Simulation Core │
+│ ├─ Event-Sourced Game State │
+│ └─ Rollback Networking │
+├─────────────────────────────────────────────────────────────┤
+│ Platform Layer │
+│ ├─ Input Abstraction (KB/Mouse/Touch/Gamepad) │
+│ ├─ Audio Context Manager │
+│ ├─ Storage Abstraction (IndexedDB/LocalStorage) │
+│ └─ Network Transport (WebSocket/WebRTC/SharedWorker) │
+└─────────────────────────────────────────────────────────────┘
+
+CORE PATTERNS:
+• Entity-Component-System (pure data-oriented)
+• Command Pattern for all mutations
+• Observer Pattern for UI binding
+• Object Pools for all dynamic allocations
+• Ring Buffers for network packets
+• Spatial Hashing for broad-phase collision
+• Behavior Trees for AI decision making
+
+═══════════════════════════════════════════════════════════════
+§3A AESTHETIC & CONTENT SEED (Non-Negotiable Inputs)
+───────────────────────────────────────────────────────────────
+VISUAL THEME: "Glitchwave" - A fusion of clean, minimalist geometry with vibrant neon highlights and digital glitch post-processing effects. Style references: Mirror's Edge, Tron: Legacy.
+
+COLOR PALETTE:
+• Primary-BG: #0a0a10 (Near Black)
+• Secondary-BG: #1a1a2e (Dark Imperial Blue)
+• Accent-Neon: #e94560 (Vibrant Pink/Red)
+• Accent-Cyan: #00f5d4 (Bright Turquoise)
+• Text/UI: #f0f0f0 (Off-White)
+
+TYPOGRAPHY:
+• Headers: 'Rajdhani', sans-serif (via Google Fonts API)
+• Body: 'Roboto Mono', monospace (via Google Fonts API)
+
+PROCEDURAL ASSET SEEDS:
+• Buildings: Grammar-based generation. Rules: Generate rectangular bases, stack 1-3 levels, add flat roofs. Apply neon trim (Accent-Neon) to 20% of all exterior edges.
+• Terrain: Perlin noise map. Parameters: amplitude=15, frequency=0.05. Render with a flat-shaded, low-poly style using the defined color palette.
+
+INITIAL WEAPON SEED (Balance Table v1.0):
+• Pulse Rifle (Common): Type: Hitscan, Damage: 12, Fire Rate: 8 shots/sec, Range: 100m, Recoil: Low.
+• Shard Launcher (Rare): Type: Projectile, Damage: 40 (splash), Fire Rate: 1.5 shots/sec, Projectile Speed: 75 m/s, Recoil: Medium.
+
+INITIAL SFX SEED:
+• Pulse Rifle Shot: A sharp, digital "pew" with a synthesized bass kick.
+• Player Footsteps (Concrete): A low-thud with a subtle static crackle.
+• UI Click: A clean, short square wave blip.
+
+═══════════════════════════════════════════════════════════════
+§4 ENHANCED PROJECT STRUCTURE
+───────────────────────────────────────────────────────────────
+nexus-royale/
+├─ .github/
+│ ├─ workflows/ # CI/CD pipelines (lint, test, build)
+│ └─ ISSUE_TEMPLATE/ # Bug/feature templates
+├─ src/
+│ ├─ engine/
+│ │ ├─ core/
+│ │ │ ├─ ecs/ # Entity-Component-System
+│ │ │ ├─ events/ # Event bus & commands
+│ │ │ ├─ math/ # Vector, Matrix, Quaternion
+│ │ │ └─ memory/ # Pools, allocators
+│ │ ├─ renderer/
+│ │ │ ├─ pipelines/ # Shader systems
+│ │ │ ├─ postfx/ # Screen-space effects
+│ │ │ ├─ lod/ # Level-of-detail
+│ │ │ └─ culling/ # Frustum, occlusion
+│ │ ├─ physics/
+│ │ │ ├─ broadphase/ # Spatial partitioning
+│ │ │ ├─ narrowphase/ # GJK, SAT collision
+│ │ │ ├─ dynamics/ # Forces, constraints
+│ │ │ └─ queries/ # Raycasts, sweeps
+│ │ ├─ audio/
+│ │ │ ├─ mixer/ # 3D spatial audio
+│ │ │ ├─ synthesis/ # Procedural SFX
+│ │ │ └─ music/ # Dynamic soundtrack
+│ │ └─ net/
+│ │ ├─ protocol/ # Binary serialization
+│ │ ├─ transport/ # WebRTC, WebSocket
+│ │ ├─ sync/ # State reconciliation
+│ │ └─ prediction/ # Client-side prediction
+│ ├─ game/
+│ │ ├─ systems/ # Game-specific ECS systems
+│ │ ├─ prefabs/ # Entity blueprints
+│ │ ├─ ai/
+│ │ │ ├─ pathfinding/ # Hierarchical A*
+│ │ │ ├─ perception/ # Vision, hearing
+│ │ │ ├─ planning/ # GOAP, Behavior trees
+│ │ │ └─ learning/ # Neural bot training
+│ │ ├─ weapons/
+│ │ │ ├─ ballistics/ # Projectile physics
+│ │ │ ├─ damage/ # Damage models
+│ │ │ └─ feedback/ # Recoil, effects
+│ │ ├─ movement/
+│ │ │ ├─ character/ # State machines
+│ │ │ ├─ vehicles/ # Vehicle physics
+│ │ │ └─ animation/ # IK, procedural
+│ │ ├─ environment/
+│ │ │ ├─ terrain/ # LOD terrain system
+│ │ │ ├─ destruction/ # Fracture, debris
+│ │ │ ├─ weather/ # Dynamic weather
+│ │ │ └─ lighting/ # Day/night cycle
+│ │ └─ meta/
+│ │ ├─ progression/ # XP, unlocks
+│ │ ├─ matchmaking/ # Skill-based MM
+│ │ └─ analytics/ # Telemetry, KPIs
+│ ├─ ui/
+│ │ ├─ framework/ # Reactive UI system
+│ │ ├─ screens/ # Menu, HUD, overlays
+│ │ ├─ components/ # Reusable widgets
+│ │ └─ themes/ # Visual themes
+│ ├─ content/
+│ │ ├─ maps/ # Map definitions
+│ │ ├─ items/ # Weapon/item configs
+│ │ ├─ balance/ # Tuning parameters
+│ │ └─ localization/ # i18n strings
+│ └─ platform/
+│ ├─ web/ # PWA, Service Worker
+│ ├─ desktop/ # Electron wrapper
+│ └─ mobile/ # Capacitor wrapper
+├─ tests/
+│ ├─ unit/ # Component tests
+│ ├─ integration/ # System tests
+│ ├─ e2e/ # Playwright tests
+│ ├─ performance/ # Benchmark suite
+│ └─ playtests/ # Playtest protocols
+├─ tools/
+│ ├─ editor/ # Level editor
+│ ├─ profiler/ # Performance profiler
+│ ├─ debugger/ # Runtime inspector
+│ └─ pipeline/ # Asset pipeline
+├─ docs/
+│ ├─ architecture/ # System design docs
+│ ├─ api/ # Code documentation
+│ ├─ guides/ # How-to guides
+│ └─ postmortems/ # Learning docs
+└─ config/
+├─ build/ # Build configurations (e.g., Vite, Webpack)
+├─ deploy/ # Deployment configs (e.g., Dockerfile)
+└─ monitoring/ # Observability setup (e.g., Prometheus)
+
+═══════════════════════════════════════════════════════════════
+§5 DEVELOPMENT PIPELINE
+───────────────────────────────────────────────────────────────
+STATUS: DEPRECATED. Replaced by the sequential BUILD QUEUE in §16. Do not refer to phases.
+
+═══════════════════════════════════════════════════════════════
+§6 PERFORMANCE ENGINEERING
+───────────────────────────────────────────────────────────────
+FRAME BUDGET (16.67ms @ 60 FPS)
+┌─────────────────────────────────┐
+│ System │ Budget (ms) │
+├─────────────────┼───────────────┤
+│ Game Logic │ 4.0 │
+│ Physics │ 3.0 │
+│ Rendering │ 6.0 │
+│ AI │ 2.0 │
+│ Networking │ 1.0 │
+│ Overhead │ 0.67 │
+└─────────────────────────────────┘
+
+OPTIMIZATION STRATEGIES (Mandatory Implementation)
+• SIMD operations via WASM for vector math.
+• GPU compute shaders for particles and skinning.
+• Texture atlasing for UI and effects; instancing for all repeated geometries.
+• Async scene loading and asset preloading via Web Workers.
+• Adaptive Level of Detail (LOD) based on measured frame time.
+• Mesh simplification as part of the asset pipeline.
+
+PROFILING TOOLS (Mandatory Integration)
+• Chrome DevTools Performance.
+• Spector.js for WebGL debugging.
+• A custom, in-game frame time profiler overlay showing the budget from the table above.
+• A custom memory allocation tracker to monitor object pool effectiveness.
+
+═══════════════════════════════════════════════════════════════
+§7 ARTIFICIAL INTELLIGENCE SYSTEMS
+───────────────────────────────────────────────────────────────
+BOT ARCHITECTURE
+┌─────────────────────────────────────┐
+│ PERCEPTION LAYER │
+│ • Vision cones with occlusion checks│
+│ • Sound propagation system │
+│ • Memory of last known positions │
+├─────────────────────────────────────┤
+│ DECISION LAYER │
+│ • Behavior Trees │
+│ • Utility-based reasoning for target│
+│ selection │
+│ • Personality parameters (aggression)│
+├─────────────────────────────────────┤
+│ EXECUTION LAYER │
+│ • Path planning (A*) │
+│ • Aim prediction & projectile leading│
+│ • Movement state machine (patrol, │
+│ combat, search) │
+└─────────────────────────────────────┘
+
+BOT BEHAVIORS (Initial Set)
+• Patrol: Generate dynamic waypoints within a defined radius.
+• Search: Move towards last known enemy position upon losing sight.
+• Combat: Strafe, seek cover, and engage targets within line of sight.
+• Retreat: Withdraw from combat if health drops below 25%.
+• Loot: Identify and move towards higher-tier items.
+
+DIFFICULTY SCALING (Implement as parameters)
+• Reaction time: 150-400ms
+• Aim accuracy: 40-90%
+• Decision frequency: 2-10 Hz
+• Perception range: 50-150m
+• Memory duration: 5-30s
+
+═══════════════════════════════════════════════════════════════
+§8 NETWORKING & MULTIPLAYER
+───────────────────────────────────────────────────────────────
+ARCHITECTURE: Deterministic Lockstep with Client-Side Prediction and Server-Side Rollback.
+
+CLIENT-SERVER MODEL:
+• Authoritative server simulation. The server has the final say on game state.
+• Client-side prediction of local player movement.
+• Lag compensation for remote entities within a 200ms window.
+• Server-side reconciliation of client state; snap if prediction deviates significantly.
+
+PROTOCOL DESIGN:
+• Binary serialization using MessagePack.
+• Delta compression: only send changed component values.
+• Prioritize updates based on entity relevance to the player.
+• Use reliable ordered channels (WebRTC) for critical events (e.g., shooting) and unreliable channels for transient state (e.g., continuous position).
+
+ANTI-CHEAT MEASURES (Server-Side):
+• Validate all client inputs against game rules (e.g., movement speed, fire rate).
+• Perform server-side visibility checks before validating damage.
+• Implement statistical anomaly detection for rapid actions or unusual hit rates.
+
+═══════════════════════════════════════════════════════════════
+§9 CONTENT PIPELINE
+───────────────────────────────────────────────────────────────
+ASSET GENERATION:
+• Procedural generation is mandatory for initial assets. Use the seeds in §3A.
+• Weapon Meshes: Parametric generation based on type, length, and attachments.
+• Terrain: Noise-based heightmap generation.
+• Buildings: Grammar-based rules for structure and facade details.
+
+OPTIMIZATION PIPELINE (Automated via tools/pipeline/)
+
+Mesh Decimation: Progressive mesh simplification.
+
+Texture Compression: Use Basis Universal format.
+
+Animation Compression: Quantize rotation and translation data.
+
+Audio Compression: Use Opus codec.
+
+Bundle Splitting: Automatic code-splitting by route/feature.
+
+RUNTIME LOADING:
+• Implement progressive enhancement: load a low-quality version first, then stream in higher-quality assets.
+• Utilize background web workers for non-blocking asset loading.
+
+═══════════════════════════════════════════════════════════════
+§10 QUALITY ASSURANCE
+───────────────────────────────────────────────────────────────
+AUTOMATED TESTING:
+• Unit Tests (Jest): Target 90% code coverage for all engine and logic modules.
+• Integration Tests: Ensure critical paths like the "shoot-damage-eliminate" loop are tested.
+• Performance Tests: Run automated benchmarks against the frame budget (§6) in a headless browser.
+• Load Tests: Simulate 100 concurrent bots in a test environment to identify bottlenecks.
+
+MANUAL TESTING PROTOCOLS:
+• A documented playtest protocol must be created in tests/playtests/ covering core loop actions.
+• An accessibility audit against the features in §13 must be performed before the 2-week MVP deadline.
+
+METRICS & MONITORING (Integration Required):
+• Implement a Real User Monitoring (RUM) client to send performance data.
+• Integrate an error tracking service (like a Sentry client) for all exceptions.
+• Build an A/B testing framework stub in the meta/ module.
+
+═══════════════════════════════════════════════════════════════
+§11 DEPLOYMENT & OPERATIONS
+───────────────────────────────────────────────────────────────
+BUILD PIPELINE (Implement in .github/workflows/)
+
+Linting (ESLint) & Formatting (Prettier) check.
+
+TypeScript type checking (tsc --noEmit).
+
+Run all unit and integration tests.
+
+Bundle and minify all assets for production (Vite or similar).
+
+Generate PWA manifest and service worker.
+
+Generate version-tagged artifacts.
+
+DEPLOYMENT STRATEGY:
+• Distribute all static assets via a global CDN (e.g., Cloudflare Pages, Netlify, Vercel).
+• Implement a rolling update strategy for server deployments.
+• Use feature flags for all new, potentially unstable features.
+• Ensure a fast and automatic rollback mechanism on critical error spikes.
+
+═══════════════════════════════════════════════════════════════
+§12 GAME FEEL & POLISH
+───────────────────────────────────────────────────────────────
+"JUICE" TECHNIQUES (Implement these specific techniques):
+• Screen shake: Parametric function based on event magnitude (e.g., explosion > weapon fire).
+• Hit stop: Pause simulation for a few frames (e.g., 10-30ms) upon a successful hit.
+• Particle bursts: On impact, spawn procedurally generated particles matching the surface color.
+• Sound layering: Combine multiple sounds for key events (e.g., shot = mechanism + blast + tail).
+• Motion blur: Optional post-processing effect for fast camera movements.
+• Debris physics: Spawn small, temporary physics objects from destroyed elements.
+• Ragdoll on elimination: Switch from animated model to a physics-based ragdoll.
+
+FEEDBACK SYSTEMS (Implement these specific systems):
+• Damage numbers: Display damage dealt as text floating from the target.
+• Hit markers: Visual (UI) and audio confirmation of a successful shot.
+• Kill feed: A top-right UI element announcing all eliminations.
+• Spatial audio cues: All sounds must be positioned in 3D space.
+• Muzzle flash: Light source attached to the weapon barrel during firing.
+• Bullet tracers: Visual representation of projectile paths.
+• Impact decals: Persistent marks on surfaces where projectiles have hit.
+
+═══════════════════════════════════════════════════════════════
+§13 ACCESSIBILITY FEATURES
+───────────────────────────────────────────────────────────────
+VISUAL:
+• Implement colorblind modes (Protanopia, Deuteranopia, Tritanopia) via post-processing filters.
+• UI must be scalable from 50% to 200%.
+• A high-contrast mode must be available, using a simplified color palette.
+
+AUDIO:
+• A visual sound indicator ("radar") must be implemented to show the direction of key sounds.
+• Separate volume sliders for Master, Effects, Music, and UI must be included.
+
+MOTOR:
+• Full key remapping for keyboard and mouse.
+• Implement "Hold-to-Aim" vs "Toggle-Aim" options.
+• Implement an "Auto-Sprint" option.
+
+COGNITIVE:
+• A "ping" system for contextual communication without voice.
+• Objective markers must be clear and persistent.
+• All tutorials must be skippable.
+
+═══════════════════════════════════════════════════════════════
+§14 MONETIZATION READY (FUTURE)
+───────────────────────────────────────────────────────────────
+ETHICAL F2P DESIGN (Philosophy to build towards):
+• All purchasable items must be cosmetic only. No pay-to-win advantages.
+• A Battle Pass system offering cosmetic rewards is the target model.
+• All premium items must also have a path to be earned via significant playtime.
+
+SYSTEMS TO BUILD (Stubs and interfaces):
+• Create interfaces for a Shop, Inventory, and Transaction service.
+• Implement a client-side inventory system for managing cosmetic items. The backend can be mocked.
+
+═══════════════════════════════════════════════════════════════
+§15 SUCCESS METRICS
+───────────────────────────────────────────────────────────────
+TECHNICAL (MVP Target):
+✓ Stable 60 FPS on a system equivalent to a NVIDIA GTX 1060 / Apple iPhone 12.
+✓ <100ms end-to-end latency on a stable connection.
+✓ <3 second load time on a repeat visit (fully cached).
+✓ <6MB initial download bundle size.
+✓ 99.9% crash-free user sessions.
+
+GAMEPLAY (MVP Target):
+✓ D1 Retention > 40%.
+✓ Average Session Length: 8-12 minutes.
+✓ >3 Sessions per Daily Active User.
+✓ Average matchmaking time < 30 seconds.
+
+BUSINESS (Future Goal):
+✓ ARPDAU > $0.10.
+✓ Conversion Rate > 5%.
+✓ D30 Retention > 10%.
+
+═══════════════════════════════════════════════════════════════
+§16 BUILD QUEUE (PRIORITIZED & SEQUENTIAL)
+───────────────────────────────────────────────────────────────
+STOP PLANNING. START EXECUTING. NOW. Follow this exact order. Do not proceed to a step until the previous one is fully implemented, documented, and unit-tested where applicable.
+
+Project Scaffolding: Create the complete, empty directory structure from §4. Initialize a package.json with TypeScript, Three.js, and Vite. Configure TypeScript paths (tsconfig.json) to match the src/ structure.
+
+Core Engine - Math: Implement src/engine/core/math/ (Vector3, Matrix4, Quaternion). Add unit tests with 100% coverage for this module in tests/unit/.
+
+Core Engine - ECS: Implement the BitECS-inspired framework in src/engine/core/ecs/.
+
+Core Engine - Main Loop: Establish a fixed-timestep main game loop using requestAnimationFrame. Isolate physics updates from rendering updates.
+
+Renderer - Foundation: Initialize the Three.js WebGL2 renderer, scene, and an orthographic camera in src/engine/renderer/. Clear the screen to Primary-BG color from §3A.
+
+Platform - Input: Implement the input abstraction layer src/platform/web/ for Keyboard (WASD) and Mouse (look).
+
+Game - Character Controller: Create a Player prefab in src/game/prefabs/. Implement an ECS system that translates inputs into character velocity.
+
+Physics - Core: Implement spatial hashing (broadphase) and a dynamics system for movement and gravity.
+
+Procedural Content - Terrain: Generate the initial terrain mesh based on parameters in §3A and add it to the scene.
+
+Game Feel - Camera: Implement a third-person follow camera that smoothly tracks the player entity. Include logic to prevent clipping through terrain.
+
+Renderer - Shaders & Materials: Create custom GLSL shaders for flat-shaded materials using the §3A color palette.
+
+Game - Weapon System: Implement the Pulse Rifle from §3A, including hitscan logic, damage application, and fire rate limits.
+
+Game - AI - Core: Implement a basic Behavior Tree system and a perception component for storing visible targets.
+
+Game - AI - Behavior: Create a bot agent prefab. Implement "patrol" and "shoot on sight" behaviors. Spawn 10 bots.
+
+Networking - Foundation: Implement the WebSocket transport layer and MessagePack binary serialization.
+
+Networking - State Sync: Architect the server-authoritative state synchronization loop. Clients send inputs; the server computes physics and broadcasts resulting game states.
+
+UI - HUD: Create a minimal HUD using a reactive UI framework. Display the local player's health. Use fonts and colors from §3A.
+
+Game Feel - Juice: Implement the Pulse Rifle SFX from §3A using the Web Audio API. Add a parametric screen shake on weapon fire.
+
+Performance - Profiling: Build the in-game profiler overlay to monitor the frame budget detailed in §6.
+
+Full Game Loop: Connect all systems to enable the full core loop: Queue (auto-join), Drop (fixed spawn points), Loot (placeholder items), Fight (player vs. bot), Survive.
+
+CI/CD: Implement the .github/workflows/ for linting, testing, and building on every push.
+
+Deploy: Write the deployment configuration to push the built assets to a CDN.
+
+FINAL DIRECTIVE: The objective is a shippable, production-grade game. Every system must be instrumented, tested, and performant. Execute.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
