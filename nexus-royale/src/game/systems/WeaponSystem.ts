@@ -25,6 +25,7 @@ export function createWeaponSystem(playerEntity: number): System {
       w.ammo -= 1;
       ctx.world.add(playerEntity, 'WeaponState', w);
       playPulseRifle();
+      eventBus.emit('shake', { mag: 0.06, duration: 0.08 });
 
       const origin = new Vector3(0, 1.5, 0);
       const dir = new Vector3(0, 0, 1);

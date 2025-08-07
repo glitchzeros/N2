@@ -21,6 +21,8 @@ import { createPerceptionSystem } from '@/game/ai/perception/Perception';
 import { createAISystem } from '@/game/systems/AISystem';
 import { initRUM } from '@/config/monitoring/rum-client';
 import { initErrorTracking } from '@/config/monitoring/error-tracking';
+import { createScreenShakeSystem } from '@/game/systems/ScreenShakeSystem';
+import { HitMarker } from '@/ui/components/HitMarker';
 
 export class Game {
   readonly world = new World();
@@ -32,6 +34,7 @@ export class Game {
   private readonly profiler = new FrameProfilerOverlay();
   private readonly killFeed = new KillFeed();
   private readonly damageNumbers = new DamageNumbers();
+  private readonly hitMarker = new HitMarker();
 
   constructor() {
     registerGameComponents(this.world);
@@ -56,8 +59,9 @@ export class Game {
     const mesh = buildTerrainMesh(data);
     this.renderer.getScene().add(mesh);
 
-    // Camera follow
+    // Camera + shake
     this.scheduler.add(createCameraSystem(this.playerEntity, this.renderer));
+    this.scheduler.add(createScreenShakeSystem(this.renderer));
 
     // Loop
     this.loop = new MainLoop({
@@ -79,6 +83,7 @@ export class Game {
       this.profiler.mount(document.body);
       this.killFeed.mount(document.body);
       this.damageNumbers.mount(document.body);
+      this.hitMarker.mount(document.body);
       initErrorTracking();
       initRUM();
     }
@@ -93,6 +98,7 @@ export class Game {
       this.profiler.unmount();
       this.killFeed.unmount();
       this.damageNumbers.unmount();
+      this.hitMarker.unmount();
     }
     this.renderer.dispose();
   }
