@@ -94,6 +94,18 @@ export function bootstrap(): void {
       }
     };
 
+    const aiButton = document.createElement('button');
+    aiButton.textContent = 'Show AI';
+    aiButton.style.margin = '0 10px';
+    aiButton.onclick = () => {
+      const aiInfo = game.getAIDebugInfo();
+      if (aiInfo) {
+        status.textContent = `AI - Total: ${aiInfo.ai.totalAI}, States: ${Object.keys(aiInfo.ai.states).join(', ')}, Behaviors: ${Object.keys(aiInfo.ai.behaviors).join(', ')}`;
+      } else {
+        status.textContent = 'No AI info available';
+      }
+    };
+
     const projectileButton = document.createElement('button');
     projectileButton.textContent = 'Fire Projectile';
     projectileButton.style.margin = '0 10px';
@@ -112,6 +124,21 @@ export function bootstrap(): void {
       }
     };
 
+    const spawnAIButton = document.createElement('button');
+    spawnAIButton.textContent = 'Spawn AI';
+    spawnAIButton.style.margin = '0 10px';
+    spawnAIButton.onclick = () => {
+      const aiSystem = game.getAISystem();
+      if (aiSystem) {
+        // Spawn a group of AI bots
+        const center = new Vector3(0, 0, 0);
+        const aiEntities = aiSystem.createAIGroup(3, center, 30);
+        status.textContent = `Spawned ${aiEntities.length} AI bots!`;
+      } else {
+        status.textContent = 'Cannot spawn AI';
+      }
+    };
+
     const lockButton = document.createElement('button');
     lockButton.textContent = 'Lock Mouse';
     lockButton.style.margin = '0 10px';
@@ -124,7 +151,9 @@ export function bootstrap(): void {
     controls.appendChild(statsButton);
     controls.appendChild(inputButton);
     controls.appendChild(physicsButton);
+    controls.appendChild(aiButton);
     controls.appendChild(projectileButton);
+    controls.appendChild(spawnAIButton);
     controls.appendChild(lockButton);
     app.appendChild(controls);
 
@@ -159,7 +188,7 @@ export function bootstrap(): void {
       <ul>
         <li>✅ Input system (WASD movement, mouse look)</li>
         <li>✅ Physics system (projectile ballistics, collision detection)</li>
-        <li>🤖 Add AI behavior and pathfinding</li>
+        <li>✅ AI system (bot behavior, pathfinding, decision making)</li>
         <li>🌍 Add 3D rendering and terrain</li>
         <li>🔊 Add audio system</li>
         <li>🌐 Add multiplayer networking</li>

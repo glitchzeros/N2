@@ -4,6 +4,7 @@ import { PlayerSystem } from '@/game/systems/PlayerSystem';
 import { WeaponSystem } from '@/game/systems/WeaponSystem';
 import { InputSystem } from '@/game/systems/InputSystem';
 import { PhysicsSystem } from '@/game/systems/PhysicsSystem';
+import { AISystem } from '@/game/systems/AISystem';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
@@ -28,6 +29,7 @@ export class Game {
   private weaponSystem: WeaponSystem;
   private inputSystem: InputSystem;
   private physicsSystem: PhysicsSystem;
+  private aiSystem: AISystem;
   private inputManager: InputManager;
   private physicsWorld: PhysicsWorld;
 
@@ -48,6 +50,7 @@ export class Game {
     this.weaponSystem = new WeaponSystem();
     this.inputSystem = new InputSystem(this.inputManager);
     this.physicsSystem = new PhysicsSystem(this.physicsWorld);
+    this.aiSystem = new AISystem(this.physicsWorld);
     
     this.setupSystems();
     this.setupGameLoop();
@@ -95,6 +98,7 @@ export class Game {
     // Add systems to world
     this.world.addSystem(this.inputSystem);
     this.world.addSystem(this.physicsSystem);
+    this.world.addSystem(this.aiSystem);
     this.world.addSystem(this.playerSystem);
     this.world.addSystem(this.weaponSystem);
     
@@ -464,5 +468,19 @@ export class Game {
    */
   getPhysicsDebugInfo(): any {
     return this.physicsSystem.getStats();
+  }
+
+  /**
+   * Get AI system
+   */
+  getAISystem(): AISystem {
+    return this.aiSystem;
+  }
+
+  /**
+   * Get AI debug info
+   */
+  getAIDebugInfo(): any {
+    return this.aiSystem.getDebugInfo();
   }
 }
