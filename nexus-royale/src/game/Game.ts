@@ -6,6 +6,7 @@ import { InputSystem } from '@/game/systems/InputSystem';
 import { PhysicsSystem } from '@/game/systems/PhysicsSystem';
 import { AISystem } from '@/game/systems/AISystem';
 import { Renderer } from '@/engine/renderer/Renderer';
+import { AudioManager } from '@/engine/audio/AudioManager';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
@@ -32,6 +33,7 @@ export class Game {
   private physicsSystem: PhysicsSystem;
   private aiSystem: AISystem;
   private renderer: Renderer | null = null;
+  private audioManager: AudioManager | null = null;
   private inputManager: InputManager;
   private physicsWorld: PhysicsWorld;
 
@@ -506,5 +508,27 @@ export class Game {
   getRendererDebugInfo(): any {
     if (!this.renderer) return null;
     return this.renderer.getStats();
+  }
+
+  /**
+   * Initialize audio manager
+   */
+  initializeAudioManager(): void {
+    this.audioManager = new AudioManager();
+  }
+
+  /**
+   * Get audio manager
+   */
+  getAudioManager(): AudioManager | null {
+    return this.audioManager;
+  }
+
+  /**
+   * Get audio debug info
+   */
+  getAudioDebugInfo(): any {
+    if (!this.audioManager) return null;
+    return this.audioManager.getStats();
   }
 }

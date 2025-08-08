@@ -30,6 +30,9 @@ export function bootstrap(): void {
     // Create and start game
     const game = new Game();
     
+    // Initialize audio manager
+    game.initializeAudioManager();
+    
     // Update status
     status.textContent = 'Starting game...';
     
@@ -151,6 +154,34 @@ export function bootstrap(): void {
       }
     };
 
+    const audioButton = document.createElement('button');
+    audioButton.textContent = 'Show Audio';
+    audioButton.style.margin = '0 10px';
+    audioButton.onclick = () => {
+      const audioInfo = game.getAudioDebugInfo();
+      if (audioInfo) {
+        status.textContent = `Audio - Initialized: ${audioInfo.initialized}, Spatial Sources: ${audioInfo.spatialSources}, Context: ${audioInfo.contextState}`;
+      } else {
+        status.textContent = 'No audio info available';
+      }
+    };
+
+    const playSoundButton = document.createElement('button');
+    playSoundButton.textContent = 'Play Sound';
+    playSoundButton.style.margin = '0 10px';
+    playSoundButton.onclick = () => {
+      const audioManager = game.getAudioManager();
+      if (audioManager) {
+        // Create a procedural sound effect
+        const soundEffectManager = audioManager.getSoundEffectManager();
+        const effect = soundEffectManager.createProceduralEffect('test_sound', 'sfx', 0.5, 440);
+        audioManager.playSoundEffect('test_sound');
+        status.textContent = 'Playing test sound effect!';
+      } else {
+        status.textContent = 'Audio manager not available';
+      }
+    };
+
     const lockButton = document.createElement('button');
     lockButton.textContent = 'Lock Mouse';
     lockButton.style.margin = '0 10px';
@@ -167,6 +198,8 @@ export function bootstrap(): void {
     controls.appendChild(projectileButton);
     controls.appendChild(spawnAIButton);
     controls.appendChild(rendererButton);
+    controls.appendChild(audioButton);
+    controls.appendChild(playSoundButton);
     controls.appendChild(lockButton);
     app.appendChild(controls);
 
@@ -203,7 +236,7 @@ export function bootstrap(): void {
         <li>✅ Physics system (projectile ballistics, collision detection)</li>
         <li>✅ AI system (bot behavior, pathfinding, decision making)</li>
         <li>✅ 3D rendering system (Three.js integration, terrain, entities)</li>
-        <li>🔊 Add audio system</li>
+        <li>✅ Audio system (spatial sound effects, dynamic music)</li>
         <li>🌐 Add multiplayer networking</li>
       </ul>
     `;
