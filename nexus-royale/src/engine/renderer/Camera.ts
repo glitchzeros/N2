@@ -335,7 +335,7 @@ export class Camera {
   /**
    * Check if mouse is locked
    */
-  isMouseLocked(): boolean {
+  getMouseLocked(): boolean {
     return this.isMouseLocked;
   }
 

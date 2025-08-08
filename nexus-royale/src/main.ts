@@ -1,6 +1,8 @@
 import { Game } from '@/game/Game';
 import { testECS } from '@/test-ecs';
 import { registerServiceWorker } from '@/platform/web/ServiceWorkerRegistration';
+import { Vector3 } from '@/engine/core/math/Vector3';
+import { ProjectileType } from '@/game/components/Projectile';
 
 export function bootstrap(): void {
   const app = document.getElementById('app');
@@ -120,7 +122,7 @@ export function bootstrap(): void {
         const position = new Vector3(0, 100, 0);
         const direction = new Vector3(0, 0, -1);
         const stats = { damage: 25, speed: 300, range: 100, gravity: 0, airResistance: 0.01, bounceCount: 0, explosionRadius: 0, lifetime: 2 };
-        physicsSystem.createProjectile('bullet', stats, position, direction, localPlayer.id);
+        physicsSystem.createProjectile(ProjectileType.BULLET, stats, position, direction, localPlayer.id);
         status.textContent = 'Projectile fired!';
       } else {
         status.textContent = 'Cannot fire projectile';
