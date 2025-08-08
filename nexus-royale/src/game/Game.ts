@@ -53,6 +53,13 @@ export class Game {
   private lastRenderMs = 16.67;
   private readonly dropIndicator = new DropIndicator(this.world, this.playerEntity);
 
+  private keyHandler = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      if (this.pause.isPaused()) { this.pause.resume(); this.menu.hide(); }
+      else { this.pause.pause(); this.menu.show(); }
+    }
+  };
+
   constructor() {
     const noVfx = getFlag('noVFX', false);
     const noHud = getFlag('noHUD', false);
@@ -133,6 +140,7 @@ export class Game {
       initErrorTracking();
       initRUM();
       initTelemetry();
+      window.addEventListener('keydown', this.keyHandler);
     }
     this.loop.start();
   }
@@ -141,6 +149,7 @@ export class Game {
     this.loop.stop();
     if (typeof window !== 'undefined') {
       input.detach(window);
+      window.removeEventListener('keydown', this.keyHandler);
       this.hud.unmount();
       this.profiler.unmount();
       this.killFeed.unmount();
