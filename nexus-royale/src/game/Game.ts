@@ -34,6 +34,7 @@ import { getFlag, getString } from '@/config/build/featureFlags';
 import { PauseController } from '@/game/meta/PauseController';
 import { MainMenu } from '@/ui/screens/MainMenu';
 import { createSpawnPhaseSystem } from '@/game/systems/SpawnPhaseSystem';
+import { DropIndicator } from '@/ui/screens/DropIndicator';
 
 export class Game {
   readonly world = new World();
@@ -49,6 +50,7 @@ export class Game {
   private readonly pause = new PauseController();
   private readonly menu = new MainMenu(this.pause);
   private lastRenderMs = 16.67;
+  private readonly dropIndicator = new DropIndicator(this.world, this.playerEntity);
 
   constructor() {
     const noVfx = getFlag('noVFX', false);
@@ -101,6 +103,7 @@ export class Game {
         const fps = this.profiler.tick();
         const health = this.world.get<{ hp: number; max: number }>(this.playerEntity, 'Health');
         if (health && !noHud) this.hud.state.set({ health: Math.round(health.hp), maxHealth: health.max, fps });
+        this.dropIndicator.update();
         this.renderer.render();
         const t1 = performance.now();
         this.lastRenderMs = Math.max(1, t1 - t0);
@@ -115,6 +118,7 @@ export class Game {
       this.killFeed.mount(document.body);
       this.damageNumbers.mount(document.body);
       this.hitMarker.mount(document.body);
+      this.dropIndicator.mount(document.body);
     }
 
     // Menu starts visible (paused)
@@ -141,6 +145,7 @@ export class Game {
       this.killFeed.unmount();
       this.damageNumbers.unmount();
       this.hitMarker.unmount();
+      this.dropIndicator.unmount();
       this.menu.unmount();
     }
     this.renderer.dispose();
