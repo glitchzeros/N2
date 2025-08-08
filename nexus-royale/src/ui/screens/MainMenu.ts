@@ -26,20 +26,28 @@ export class MainMenu {
     title.style.fontSize = '28px';
     title.style.marginBottom = '12px';
 
+    const buttons = document.createElement('div');
+    buttons.style.display = 'flex';
+    buttons.style.gap = '8px';
+
     const play = document.createElement('button');
     play.textContent = 'Play';
-    play.style.marginRight = '8px';
 
-    const pause = document.createElement('button');
-    pause.textContent = 'Pause';
+    const pauseBtn = document.createElement('button');
+    pauseBtn.textContent = 'Pause';
 
-    card.append(title, play, pause);
+    const quit = document.createElement('button');
+    quit.textContent = 'Quit';
+
+    buttons.append(play, pauseBtn, quit);
+    card.append(title, buttons);
     el.appendChild(card);
     parent.appendChild(el);
     this.container = el;
 
     play.onclick = () => { this.pause.resume(); this.hide(); };
-    pause.onclick = () => { this.pause.pause(); this.show(); };
+    pauseBtn.onclick = () => { this.pause.pause(); this.show(); };
+    quit.onclick = () => { if (typeof window !== 'undefined') window.location.reload(); };
   }
 
   show(): void { if (this.container) this.container.style.display = 'grid'; }
