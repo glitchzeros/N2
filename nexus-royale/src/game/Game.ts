@@ -25,6 +25,8 @@ import { createScreenShakeSystem } from '@/game/systems/ScreenShakeSystem';
 import { HitMarker } from '@/ui/components/HitMarker';
 import { createHealthRegenSystem } from '@/game/systems/HealthRegenSystem';
 import { initTelemetry } from '@/game/meta/analytics/Telemetry';
+import { createVisibilitySystem } from '@/game/systems/VisibilitySystem';
+import * as THREE from 'three';
 
 export class Game {
   readonly world = new World();
@@ -61,6 +63,11 @@ export class Game {
     const data = generateFlatShadedGrid(64, 64, 1);
     const mesh = buildTerrainMesh(data);
     this.renderer.getScene().add(mesh);
+
+    // Visibility for terrain (approx bounding sphere)
+    const center = new THREE.Vector3((data.width * data.scale) / 2, 0, (data.depth * data.scale) / 2);
+    const radius = Math.hypot(center.x, center.z);
+    this.scheduler.add(createVisibilitySystem(this.renderer, [{ mesh, center, radius }]));
 
     // Camera + shake
     this.scheduler.add(createCameraSystem(this.playerEntity, this.renderer));
