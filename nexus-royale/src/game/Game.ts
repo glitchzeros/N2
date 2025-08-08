@@ -8,6 +8,9 @@ import { AISystem } from '@/game/systems/AISystem';
 import { Renderer } from '@/engine/renderer/Renderer';
 import { AudioManager } from '@/engine/audio/AudioManager';
 import { NetworkManager } from '@/engine/net/NetworkManager';
+import { AnalyticsManager } from '@/engine/analytics/AnalyticsManager';
+import { AccessibilityManager } from '@/engine/accessibility/AccessibilityManager';
+import { ProgressionManager } from '@/game/progression/ProgressionManager';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
@@ -36,6 +39,9 @@ export class Game {
   private renderer: Renderer | null = null;
   private audioManager: AudioManager | null = null;
   private networkManager: NetworkManager | null = null;
+  private analyticsManager: AnalyticsManager | null = null;
+  private accessibilityManager: AccessibilityManager | null = null;
+  private progressionManager: ProgressionManager | null = null;
   private inputManager: InputManager;
   private physicsWorld: PhysicsWorld;
 
@@ -58,6 +64,11 @@ export class Game {
     this.physicsSystem = new PhysicsSystem(this.physicsWorld);
     this.aiSystem = new AISystem(this.physicsWorld);
     
+    // Initialize managers
+    this.analyticsManager = new AnalyticsManager();
+    this.accessibilityManager = new AccessibilityManager();
+    this.progressionManager = new ProgressionManager(this.playerId);
+    
     this.setupSystems();
     this.setupGameLoop();
   }
@@ -71,6 +82,12 @@ export class Game {
     console.log('Starting Nexus Royale...');
     this.isRunning = true;
     this.gameState = 'lobby';
+    
+    // Track session start
+    if (this.analyticsManager) {
+      this.analyticsManager.trackSessionStart();
+      this.analyticsManager.setPlayerId(this.playerId);
+    }
     
     // Start the main loop
     this.mainLoop.start();
@@ -90,6 +107,11 @@ export class Game {
     console.log('Stopping Nexus Royale...');
     this.isRunning = false;
     this.mainLoop.stop();
+    
+    // Track session end
+    if (this.analyticsManager) {
+      this.analyticsManager.trackSessionEnd();
+    }
     
     // Clean up
     this.world.clear();
@@ -555,5 +577,35 @@ export class Game {
   getNetworkDebugInfo(): any {
     if (!this.networkManager) return null;
     return this.networkManager.getStats();
+  }
+
+  // Analytics Manager
+  getAnalyticsManager(): AnalyticsManager | null {
+    return this.analyticsManager;
+  }
+
+  getAnalyticsDebugInfo(): any {
+    if (!this.analyticsManager) return { error: 'Analytics manager not initialized' };
+    return this.analyticsManager.getStats();
+  }
+
+  // Accessibility Manager
+  getAccessibilityManager(): AccessibilityManager | null {
+    return this.accessibilityManager;
+  }
+
+  getAccessibilityDebugInfo(): any {
+    if (!this.accessibilityManager) return { error: 'Accessibility manager not initialized' };
+    return this.accessibilityManager.getStats();
+  }
+
+  // Progression Manager
+  getProgressionManager(): ProgressionManager | null {
+    return this.progressionManager;
+  }
+
+  getProgressionDebugInfo(): any {
+    if (!this.progressionManager) return { error: 'Progression manager not initialized' };
+    return this.progressionManager.getStats();
   }
 }
