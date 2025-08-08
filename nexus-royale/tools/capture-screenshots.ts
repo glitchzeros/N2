@@ -1,14 +1,21 @@
 import { chromium, Browser, Page } from 'playwright';
 
+const INTERVAL_MS = parseInt(process.env.DELAY_MS || '120000', 10);
+
 async function delay(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
 async function ensureReady(page: Page) {
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForSelector('#app', { timeout: 15000 });
-  // Wait a short moment to allow bootstrap to render UI
-  await delay(1500);
+  try {
+    // Wait until the in-game UI buttons appear (indicates bootstrap finished)
+    await page.waitForSelector('button:has-text("Fire Weapon")', { timeout: 60000 });
+  } catch {
+    // Fallback to just #app if buttons aren't found within timeout
+    await page.waitForSelector('#app', { timeout: 60000 });
+  }
+  await delay(2000);
 }
 
 async function clickIfVisible(page: Page, text: string) {
@@ -29,30 +36,28 @@ async function main() {
   await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
   await ensureReady(page);
 
-  // Hide HUD if supported (as per README flag), to capture clean visuals
-  // but keep default for now; we can pass flags via BASE_URL if needed.
-
-  // Try firing a weapon, show stats, etc. to get different states
+  // Warm-up before first screenshot
+  await delay(INTERVAL_MS);
   await page.screenshot({ path: 'screenshots/01_boot.png', fullPage: true });
 
   await clickIfVisible(page, 'Fire Weapon');
-  await delay(500);
+  await delay(INTERVAL_MS);
   await page.screenshot({ path: 'screenshots/02_fire.png', fullPage: true });
 
   await clickIfVisible(page, 'Show Stats');
-  await delay(300);
+  await delay(INTERVAL_MS);
   await page.screenshot({ path: 'screenshots/03_stats.png', fullPage: true });
 
   await clickIfVisible(page, 'Spawn AI');
-  await delay(500);
+  await delay(INTERVAL_MS);
   await page.screenshot({ path: 'screenshots/04_spawn_ai.png', fullPage: true });
 
   await clickIfVisible(page, 'Fire Projectile');
-  await delay(500);
+  await delay(INTERVAL_MS);
   await page.screenshot({ path: 'screenshots/05_projectile.png', fullPage: true });
 
   await clickIfVisible(page, 'Show Renderer');
-  await delay(300);
+  await delay(INTERVAL_MS);
   await page.screenshot({ path: 'screenshots/06_renderer.png', fullPage: true });
 
   await browser.close();
