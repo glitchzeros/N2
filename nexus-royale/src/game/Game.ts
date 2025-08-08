@@ -29,6 +29,8 @@ import { createVisibilitySystem } from '@/game/systems/VisibilitySystem';
 import * as THREE from 'three';
 import { createSingleChunk } from '@/game/environment/terrain/LodTerrain';
 import { createTerrainLodSystem } from '@/game/systems/TerrainLodSystem';
+import { createMuzzleFlashSystem } from '@/game/systems/MuzzleFlashSystem';
+import { getFlag, getString } from '@/config/build/featureFlags';
 
 export class Game {
   readonly world = new World();
@@ -44,12 +46,16 @@ export class Game {
   private lastRenderMs = 16.67;
 
   constructor() {
+    const noVfx = getFlag('noVFX', false);
+    const noHud = getFlag('noHUD', false);
+    const botCount = Number.parseInt(getString('bots', '5')) || 5;
+
     registerGameComponents(this.world);
     this.scheduler = new Scheduler({ world: this.world });
 
     // Entities and systems
     this.playerEntity = createPlayer(this.world);
-    this.scheduler.add(createSpawnSystem(5));
+    this.scheduler.add(createSpawnSystem(botCount));
     const inputSystem = createInputSystem(this.playerEntity, () => input.snapshot());
     this.scheduler.add(inputSystem);
     this.scheduler.add(createWeaponSystem(this.playerEntity));
@@ -74,9 +80,12 @@ export class Game {
     const chunk = createSingleChunk(mesh, data.width, data.depth, data.scale);
     this.scheduler.add(createTerrainLodSystem(this.renderer, [chunk], () => this.lastRenderMs));
 
-    // Camera + shake
+    // Camera + optional VFX
     this.scheduler.add(createCameraSystem(this.playerEntity, this.renderer));
-    this.scheduler.add(createScreenShakeSystem(this.renderer));
+    if (!noVfx) {
+      this.scheduler.add(createScreenShakeSystem(this.renderer));
+      this.scheduler.add(createMuzzleFlashSystem(this.renderer));
+    }
 
     // Loop
     this.loop = new MainLoop({
@@ -85,23 +94,27 @@ export class Game {
         const t0 = performance.now();
         const fps = this.profiler.tick();
         const health = this.world.get<{ hp: number; max: number }>(this.playerEntity, 'Health');
-        if (health) this.hud.state.set({ health: Math.round(health.hp), maxHealth: health.max, fps });
+        if (health && !noHud) this.hud.state.set({ health: Math.round(health.hp), maxHealth: health.max, fps });
         this.renderer.render();
         const t1 = performance.now();
         this.lastRenderMs = Math.max(1, t1 - t0);
       },
       fixedDeltaSeconds: 1 / 60
     });
-  }
 
-  start(): void {
-    if (typeof window !== 'undefined') {
-      input.attach(window);
+    // Mount UI conditionally
+    if (typeof window !== 'undefined' && !noHud) {
       this.hud.mount(document.body);
       this.profiler.mount(document.body);
       this.killFeed.mount(document.body);
       this.damageNumbers.mount(document.body);
       this.hitMarker.mount(document.body);
+    }
+  }
+
+  start(): void {
+    if (typeof window !== 'undefined') {
+      input.attach(window);
       initErrorTracking();
       initRUM();
       initTelemetry();
@@ -113,6 +126,7 @@ export class Game {
     this.loop.stop();
     if (typeof window !== 'undefined') {
       input.detach(window);
+      // UI may not be mounted if noHUD was set; safe to call
       this.hud.unmount();
       this.profiler.unmount();
       this.killFeed.unmount();
