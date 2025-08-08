@@ -14,9 +14,32 @@ export function createAISystem(): System {
         const v = ctx.world.get<Velocity>(e, 'Velocity')!;
 
         if (ai.mode === 'combat' && ai.targetEntity != null) {
-          // Face target roughly and fire
+          const targetT = ctx.world.get<Transform>(ai.targetEntity, 'Transform');
+          const health = ctx.world.get<{ hp: number; max: number }>(e, 'Health');
           input.fire = true;
-          input.moveX = 0; input.moveY = 0;
+          if (targetT) {
+            const dx = targetT.x - t.x;
+            const dz = targetT.z - t.z;
+            const d = Math.hypot(dx, dz) || 1;
+            const nx = dx / d;
+            const nz = dz / d;
+
+            // Retreat if health < 25%
+            const lowHealth = !!health && health.hp / Math.max(1, health.max) < 0.25;
+            if (lowHealth) {
+              input.moveX = -nx;
+              input.moveY = -nz;
+            } else {
+              // Strafe perpendicular to target direction
+              const side = (e % 2 === 0) ? 1 : -1; // deterministic per-entity
+              const sx = -nz * side;
+              const sz = nx * side;
+              input.moveX = sx * 0.5;
+              input.moveY = sz * 0.5;
+            }
+          } else {
+            input.moveX = 0; input.moveY = 0;
+          }
           ctx.world.add(e, 'InputState', input);
         } else {
           // Patrol: small wander
