@@ -10,6 +10,12 @@ A web-native battle royale MVP with an ECS architecture, Three.js renderer, proc
 - Tests: `npm test`
 - Build: `npm run build`
 
+## Feature flags (URL params)
+
+- `?noVFX=1` disable screen shake and muzzle/tracers
+- `?noHUD=1` hide HUD overlays (for perf testing)
+- `?bots=N` spawn N bots (default 5)
+
 ## Features
 
 - ECS core with systems for input, movement, weapons, AI, health regen
@@ -19,7 +25,7 @@ A web-native battle royale MVP with an ECS architecture, Three.js renderer, proc
 - Screen shake, muzzle flash, tracers
 - Accessibility: high-contrast and colorblind modes; input remapping
 - PWA manifest and service worker
-- Telemetry (console sink), RUM and error tracking stubs
+- Telemetry (buffered console sink), RUM and error tracking stubs
 - CI workflow for typecheck, tests, build
 
 ## Structure
