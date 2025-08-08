@@ -27,6 +27,8 @@ import { createHealthRegenSystem } from '@/game/systems/HealthRegenSystem';
 import { initTelemetry } from '@/game/meta/analytics/Telemetry';
 import { createVisibilitySystem } from '@/game/systems/VisibilitySystem';
 import * as THREE from 'three';
+import { createSingleChunk } from '@/game/environment/terrain/LodTerrain';
+import { createTerrainLodSystem } from '@/game/systems/TerrainLodSystem';
 
 export class Game {
   readonly world = new World();
@@ -39,6 +41,7 @@ export class Game {
   private readonly killFeed = new KillFeed();
   private readonly damageNumbers = new DamageNumbers();
   private readonly hitMarker = new HitMarker();
+  private lastRenderMs = 16.67;
 
   constructor() {
     registerGameComponents(this.world);
@@ -64,10 +67,12 @@ export class Game {
     const mesh = buildTerrainMesh(data);
     this.renderer.getScene().add(mesh);
 
-    // Visibility for terrain (approx bounding sphere)
+    // Visibility and LOD for terrain
     const center = new THREE.Vector3((data.width * data.scale) / 2, 0, (data.depth * data.scale) / 2);
     const radius = Math.hypot(center.x, center.z);
     this.scheduler.add(createVisibilitySystem(this.renderer, [{ mesh, center, radius }]));
+    const chunk = createSingleChunk(mesh, data.width, data.depth, data.scale);
+    this.scheduler.add(createTerrainLodSystem(this.renderer, [chunk], () => this.lastRenderMs));
 
     // Camera + shake
     this.scheduler.add(createCameraSystem(this.playerEntity, this.renderer));
@@ -77,10 +82,13 @@ export class Game {
     this.loop = new MainLoop({
       update: (dt) => this.scheduler.update(dt),
       render: () => {
+        const t0 = performance.now();
         const fps = this.profiler.tick();
         const health = this.world.get<{ hp: number; max: number }>(this.playerEntity, 'Health');
         if (health) this.hud.state.set({ health: Math.round(health.hp), maxHealth: health.max, fps });
         this.renderer.render();
+        const t1 = performance.now();
+        this.lastRenderMs = Math.max(1, t1 - t0);
       },
       fixedDeltaSeconds: 1 / 60
     });
