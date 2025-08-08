@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { System, SystemContext } from '@/engine/core/ecs/System';
 import { Renderer } from '@/engine/renderer/Renderer';
 import { eventBus } from '@/engine/core/events/EventBus';
+import { getShowTracers } from '@/config/experience/Settings';
 
 export function createMuzzleFlashSystem(renderer: Renderer): System {
   type Flash = { light: THREE.PointLight; ttl: number };
@@ -18,16 +19,18 @@ export function createMuzzleFlashSystem(renderer: Renderer): System {
     scene().add(light);
     flashes.push({ light, ttl: 0.06 });
 
-    const geom = new THREE.BufferGeometry();
-    const len = 5;
-    const start = new THREE.Vector3(p.origin.x, p.origin.y, p.origin.z);
-    const end = new THREE.Vector3(p.origin.x + p.dir.x * len, p.origin.y + p.dir.y * len, p.origin.z + p.dir.z * len);
-    const positions = new Float32Array([...start.toArray(), ...end.toArray()]);
-    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const mat = new THREE.LineBasicMaterial({ color: 0x00f5d4 });
-    const line = new THREE.Line(geom, mat);
-    scene().add(line);
-    tracers.push({ line, ttl: 0.06 });
+    if (getShowTracers()) {
+      const geom = new THREE.BufferGeometry();
+      const len = 5;
+      const start = new THREE.Vector3(p.origin.x, p.origin.y, p.origin.z);
+      const end = new THREE.Vector3(p.origin.x + p.dir.x * len, p.origin.y + p.dir.y * len, p.origin.z + p.dir.z * len);
+      const positions = new Float32Array([...start.toArray(), ...end.toArray()]);
+      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.LineBasicMaterial({ color: 0x00f5d4 });
+      const line = new THREE.Line(geom, mat);
+      scene().add(line);
+      tracers.push({ line, ttl: 0.06 });
+    }
   });
 
   return {
