@@ -31,6 +31,8 @@ import { createSingleChunk } from '@/game/environment/terrain/LodTerrain';
 import { createTerrainLodSystem } from '@/game/systems/TerrainLodSystem';
 import { createMuzzleFlashSystem } from '@/game/systems/MuzzleFlashSystem';
 import { getFlag, getString } from '@/config/build/featureFlags';
+import { PauseController } from '@/game/meta/PauseController';
+import { MainMenu } from '@/ui/screens/MainMenu';
 
 export class Game {
   readonly world = new World();
@@ -43,6 +45,8 @@ export class Game {
   private readonly killFeed = new KillFeed();
   private readonly damageNumbers = new DamageNumbers();
   private readonly hitMarker = new HitMarker();
+  private readonly pause = new PauseController();
+  private readonly menu = new MainMenu(this.pause);
   private lastRenderMs = 16.67;
 
   constructor() {
@@ -89,7 +93,7 @@ export class Game {
 
     // Loop
     this.loop = new MainLoop({
-      update: (dt) => this.scheduler.update(dt),
+      update: (dt) => { if (!this.pause.isPaused()) this.scheduler.update(dt); },
       render: () => {
         const t0 = performance.now();
         const fps = this.profiler.tick();
@@ -110,6 +114,10 @@ export class Game {
       this.damageNumbers.mount(document.body);
       this.hitMarker.mount(document.body);
     }
+
+    // Menu starts visible (paused)
+    this.pause.pause();
+    if (typeof window !== 'undefined') this.menu.mount(document.body);
   }
 
   start(): void {
@@ -126,12 +134,12 @@ export class Game {
     this.loop.stop();
     if (typeof window !== 'undefined') {
       input.detach(window);
-      // UI may not be mounted if noHUD was set; safe to call
       this.hud.unmount();
       this.profiler.unmount();
       this.killFeed.unmount();
       this.damageNumbers.unmount();
       this.hitMarker.unmount();
+      this.menu.unmount();
     }
     this.renderer.dispose();
   }
