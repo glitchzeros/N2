@@ -1,5 +1,6 @@
 import { PauseController } from '@/game/meta/PauseController';
 import { setTerrainSeed, getTerrainSeed } from '@/config/experience/Settings';
+import { CreditsOverlay } from '@/ui/screens/Credits';
 
 export class MainMenu {
   private container: HTMLElement | null = null;
@@ -47,10 +48,13 @@ export class MainMenu {
     const pauseBtn = document.createElement('button');
     pauseBtn.textContent = 'Pause';
 
+    const credits = document.createElement('button');
+    credits.textContent = 'Credits';
+
     const quit = document.createElement('button');
     quit.textContent = 'Quit';
 
-    buttons.append(play, pauseBtn, quit);
+    buttons.append(play, pauseBtn, credits, quit);
     card.append(title, seedWrap, buttons);
     el.appendChild(card);
     parent.appendChild(el);
@@ -58,6 +62,7 @@ export class MainMenu {
 
     play.onclick = () => { setTerrainSeed(parseInt(seedInput.value) || 1); this.pause.resume(); this.hide(); };
     pauseBtn.onclick = () => { this.pause.pause(); this.show(); };
+    credits.onclick = () => { new CreditsOverlay().mount(document.body); };
     quit.onclick = () => { if (typeof window !== 'undefined') window.location.reload(); };
   }
 
