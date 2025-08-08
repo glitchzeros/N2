@@ -3,11 +3,13 @@ import { MainLoop } from '@/engine/MainLoop';
 import { PlayerSystem } from '@/game/systems/PlayerSystem';
 import { WeaponSystem } from '@/game/systems/WeaponSystem';
 import { InputSystem } from '@/game/systems/InputSystem';
+import { PhysicsSystem } from '@/game/systems/PhysicsSystem';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
 import { Input } from '@/game/components/Input';
 import { InputManager } from '@/engine/core/input/InputManager';
+import { PhysicsWorld } from '@/engine/physics/PhysicsWorld';
 import { Vector3 } from '@/engine/core/math/Vector3';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,7 +27,9 @@ export class Game {
   private playerSystem: PlayerSystem;
   private weaponSystem: WeaponSystem;
   private inputSystem: InputSystem;
+  private physicsSystem: PhysicsSystem;
   private inputManager: InputManager;
+  private physicsWorld: PhysicsWorld;
 
   // Game state
   private playerCount = 0;
@@ -39,9 +43,11 @@ export class Game {
     
     // Initialize systems
     this.inputManager = new InputManager();
+    this.physicsWorld = new PhysicsWorld();
     this.playerSystem = new PlayerSystem();
     this.weaponSystem = new WeaponSystem();
     this.inputSystem = new InputSystem(this.inputManager);
+    this.physicsSystem = new PhysicsSystem(this.physicsWorld);
     
     this.setupSystems();
     this.setupGameLoop();
@@ -88,6 +94,7 @@ export class Game {
   private setupSystems(): void {
     // Add systems to world
     this.world.addSystem(this.inputSystem);
+    this.world.addSystem(this.physicsSystem);
     this.world.addSystem(this.playerSystem);
     this.world.addSystem(this.weaponSystem);
     
@@ -436,5 +443,26 @@ export class Game {
    */
   getInputDebugInfo(): any {
     return this.inputSystem.getDebugInfo();
+  }
+
+  /**
+   * Get physics system
+   */
+  getPhysicsSystem(): PhysicsSystem {
+    return this.physicsSystem;
+  }
+
+  /**
+   * Get physics world
+   */
+  getPhysicsWorld(): PhysicsWorld {
+    return this.physicsWorld;
+  }
+
+  /**
+   * Get physics debug info
+   */
+  getPhysicsDebugInfo(): any {
+    return this.physicsSystem.getStats();
   }
 }

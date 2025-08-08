@@ -82,6 +82,36 @@ export function bootstrap(): void {
       }
     };
 
+    const physicsButton = document.createElement('button');
+    physicsButton.textContent = 'Show Physics';
+    physicsButton.style.margin = '0 10px';
+    physicsButton.onclick = () => {
+      const physicsInfo = game.getPhysicsDebugInfo();
+      if (physicsInfo) {
+        status.textContent = `Physics - Bodies: ${physicsInfo.totalBodies}, Projectiles: ${physicsInfo.projectiles}, Gravity: ${physicsInfo.gravity.y.toFixed(2)}`;
+      } else {
+        status.textContent = 'No physics info available';
+      }
+    };
+
+    const projectileButton = document.createElement('button');
+    projectileButton.textContent = 'Fire Projectile';
+    projectileButton.style.margin = '0 10px';
+    projectileButton.onclick = () => {
+      const physicsSystem = game.getPhysicsSystem();
+      const localPlayer = game.getLocalPlayer();
+      if (physicsSystem && localPlayer) {
+        // Create a bullet projectile
+        const position = new Vector3(0, 100, 0);
+        const direction = new Vector3(0, 0, -1);
+        const stats = { damage: 25, speed: 300, range: 100, gravity: 0, airResistance: 0.01, bounceCount: 0, explosionRadius: 0, lifetime: 2 };
+        physicsSystem.createProjectile('bullet', stats, position, direction, localPlayer.id);
+        status.textContent = 'Projectile fired!';
+      } else {
+        status.textContent = 'Cannot fire projectile';
+      }
+    };
+
     const lockButton = document.createElement('button');
     lockButton.textContent = 'Lock Mouse';
     lockButton.style.margin = '0 10px';
@@ -93,6 +123,8 @@ export function bootstrap(): void {
     controls.appendChild(fireButton);
     controls.appendChild(statsButton);
     controls.appendChild(inputButton);
+    controls.appendChild(physicsButton);
+    controls.appendChild(projectileButton);
     controls.appendChild(lockButton);
     app.appendChild(controls);
 
@@ -126,7 +158,7 @@ export function bootstrap(): void {
       <p><strong>Next Steps:</strong></p>
       <ul>
         <li>✅ Input system (WASD movement, mouse look)</li>
-        <li>🎯 Add projectile physics and collision</li>
+        <li>✅ Physics system (projectile ballistics, collision detection)</li>
         <li>🤖 Add AI behavior and pathfinding</li>
         <li>🌍 Add 3D rendering and terrain</li>
         <li>🔊 Add audio system</li>
