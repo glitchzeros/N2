@@ -5,6 +5,7 @@ import { WeaponSystem } from '@/game/systems/WeaponSystem';
 import { InputSystem } from '@/game/systems/InputSystem';
 import { PhysicsSystem } from '@/game/systems/PhysicsSystem';
 import { AISystem } from '@/game/systems/AISystem';
+import { Renderer } from '@/engine/renderer/Renderer';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
@@ -30,6 +31,7 @@ export class Game {
   private inputSystem: InputSystem;
   private physicsSystem: PhysicsSystem;
   private aiSystem: AISystem;
+  private renderer: Renderer | null = null;
   private inputManager: InputManager;
   private physicsWorld: PhysicsWorld;
 
@@ -482,5 +484,27 @@ export class Game {
    */
   getAIDebugInfo(): any {
     return this.aiSystem.getDebugInfo();
+  }
+
+  /**
+   * Initialize renderer
+   */
+  initializeRenderer(container: HTMLElement): void {
+    this.renderer = new Renderer(container);
+  }
+
+  /**
+   * Get renderer
+   */
+  getRenderer(): Renderer | null {
+    return this.renderer;
+  }
+
+  /**
+   * Get renderer debug info
+   */
+  getRendererDebugInfo(): any {
+    if (!this.renderer) return null;
+    return this.renderer.getStats();
   }
 }

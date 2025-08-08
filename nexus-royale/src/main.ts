@@ -139,6 +139,18 @@ export function bootstrap(): void {
       }
     };
 
+    const rendererButton = document.createElement('button');
+    rendererButton.textContent = 'Show Renderer';
+    rendererButton.style.margin = '0 10px';
+    rendererButton.onclick = () => {
+      const rendererInfo = game.getRendererDebugInfo();
+      if (rendererInfo) {
+        status.textContent = `Renderer - Frames: ${rendererInfo.frameCount}, Triangles: ${rendererInfo.triangles}, Calls: ${rendererInfo.calls}`;
+      } else {
+        status.textContent = 'No renderer info available';
+      }
+    };
+
     const lockButton = document.createElement('button');
     lockButton.textContent = 'Lock Mouse';
     lockButton.style.margin = '0 10px';
@@ -154,6 +166,7 @@ export function bootstrap(): void {
     controls.appendChild(aiButton);
     controls.appendChild(projectileButton);
     controls.appendChild(spawnAIButton);
+    controls.appendChild(rendererButton);
     controls.appendChild(lockButton);
     app.appendChild(controls);
 
@@ -189,7 +202,7 @@ export function bootstrap(): void {
         <li>✅ Input system (WASD movement, mouse look)</li>
         <li>✅ Physics system (projectile ballistics, collision detection)</li>
         <li>✅ AI system (bot behavior, pathfinding, decision making)</li>
-        <li>🌍 Add 3D rendering and terrain</li>
+        <li>✅ 3D rendering system (Three.js integration, terrain, entities)</li>
         <li>🔊 Add audio system</li>
         <li>🌐 Add multiplayer networking</li>
       </ul>
