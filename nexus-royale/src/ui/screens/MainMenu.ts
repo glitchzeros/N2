@@ -1,4 +1,5 @@
 import { PauseController } from '@/game/meta/PauseController';
+import { setTerrainSeed, getTerrainSeed } from '@/config/experience/Settings';
 
 export class MainMenu {
   private container: HTMLElement | null = null;
@@ -26,6 +27,16 @@ export class MainMenu {
     title.style.fontSize = '28px';
     title.style.marginBottom = '12px';
 
+    const seedWrap = document.createElement('label');
+    seedWrap.style.display = 'block';
+    seedWrap.style.marginBottom = '8px';
+    seedWrap.textContent = 'Terrain Seed ';
+    const seedInput = document.createElement('input');
+    seedInput.type = 'number';
+    seedInput.value = String(getTerrainSeed());
+    seedInput.style.marginLeft = '6px';
+    seedWrap.appendChild(seedInput);
+
     const buttons = document.createElement('div');
     buttons.style.display = 'flex';
     buttons.style.gap = '8px';
@@ -40,12 +51,12 @@ export class MainMenu {
     quit.textContent = 'Quit';
 
     buttons.append(play, pauseBtn, quit);
-    card.append(title, buttons);
+    card.append(title, seedWrap, buttons);
     el.appendChild(card);
     parent.appendChild(el);
     this.container = el;
 
-    play.onclick = () => { this.pause.resume(); this.hide(); };
+    play.onclick = () => { setTerrainSeed(parseInt(seedInput.value) || 1); this.pause.resume(); this.hide(); };
     pauseBtn.onclick = () => { this.pause.pause(); this.show(); };
     quit.onclick = () => { if (typeof window !== 'undefined') window.location.reload(); };
   }

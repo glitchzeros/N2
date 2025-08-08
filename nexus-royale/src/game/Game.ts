@@ -35,6 +35,7 @@ import { PauseController } from '@/game/meta/PauseController';
 import { MainMenu } from '@/ui/screens/MainMenu';
 import { createSpawnPhaseSystem } from '@/game/systems/SpawnPhaseSystem';
 import { DropIndicator } from '@/ui/screens/DropIndicator';
+import { getTerrainSeed } from '@/config/experience/Settings';
 
 export class Game {
   readonly world = new World();
@@ -77,7 +78,7 @@ export class Game {
     this.renderer.init();
 
     // Terrain mesh
-    const data = generateFlatShadedGrid(64, 64, 1);
+    const data = generateFlatShadedGrid(64, 64, 1, getTerrainSeed());
     const mesh = buildTerrainMesh(data);
     this.renderer.getScene().add(mesh);
 
