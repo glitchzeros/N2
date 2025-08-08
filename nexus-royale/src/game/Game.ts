@@ -1,167 +1,407 @@
 import { World } from '@/engine/core/ecs/World';
-import { Scheduler } from '@/engine/core/ecs/Scheduler';
-import { Renderer } from '@/engine/renderer/Renderer';
 import { MainLoop } from '@/engine/MainLoop';
-import { registerGameComponents } from '@/game/components';
-import { createPlayer } from '@/game/prefabs/Player';
-import { createInputSystem } from '@/game/systems/InputSystem';
-import { CharacterControllerSystem } from '@/game/systems/CharacterControllerSystem';
-import { MovementSystem } from '@/game/systems/MovementSystem';
-import { input } from '@/platform/web/Input';
-import { generateFlatShadedGrid } from '@/game/environment/terrain/TerrainGenerator';
-import { buildTerrainMesh } from '@/game/environment/terrain/TerrainMeshThree';
-import { createCameraSystem } from '@/game/systems/CameraSystem';
-import { HUD } from '@/ui/screens/HUD';
-import { FrameProfilerOverlay } from '@/tools/profiler/FrameProfilerOverlay';
-import { createSpawnSystem } from '@/game/systems/SpawnSystem';
-import { createWeaponSystem } from '@/game/systems/WeaponSystem';
-import { KillFeed } from '@/ui/components/KillFeed';
-import { DamageNumbers } from '@/ui/components/DamageNumbers';
-import { createPerceptionSystem } from '@/game/ai/perception/Perception';
-import { createAISystem } from '@/game/systems/AISystem';
-import { initRUM } from '@/config/monitoring/rum-client';
-import { initErrorTracking } from '@/config/monitoring/error-tracking';
-import { createScreenShakeSystem } from '@/game/systems/ScreenShakeSystem';
-import { HitMarker } from '@/ui/components/HitMarker';
-import { createHealthRegenSystem } from '@/game/systems/HealthRegenSystem';
-import { initTelemetry } from '@/game/meta/analytics/Telemetry';
-import { createVisibilitySystem } from '@/game/systems/VisibilitySystem';
-import * as THREE from 'three';
-import { createSingleChunk } from '@/game/environment/terrain/LodTerrain';
-import { createTerrainLodSystem } from '@/game/systems/TerrainLodSystem';
-import { createMuzzleFlashSystem } from '@/game/systems/MuzzleFlashSystem';
-import { getFlag, getString } from '@/config/build/featureFlags';
-import { PauseController } from '@/game/meta/PauseController';
-import { MainMenu } from '@/ui/screens/MainMenu';
-import { createSpawnPhaseSystem } from '@/game/systems/SpawnPhaseSystem';
-import { DropIndicator } from '@/ui/screens/DropIndicator';
-import { getTerrainSeed } from '@/config/experience/Settings';
-import { createGravitySystem } from '@/engine/physics/dynamics/GravitySystem';
+import { PlayerSystem } from '@/game/systems/PlayerSystem';
+import { WeaponSystem } from '@/game/systems/WeaponSystem';
+import { Player } from '@/game/components/Player';
+import { Transform } from '@/game/components/Transform';
+import { Weapon } from '@/game/components/Weapon';
+import { Vector3 } from '@/engine/core/math/Vector3';
+import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Main game class for Nexus Royale
+ */
 export class Game {
-  readonly world = new World();
-  readonly renderer = new Renderer();
-  readonly scheduler: Scheduler;
-  private readonly loop: MainLoop;
-  private playerEntity: number = -1;
-  private readonly hud = new HUD();
-  private readonly profiler = new FrameProfilerOverlay();
-  private readonly killFeed = new KillFeed();
-  private readonly damageNumbers = new DamageNumbers();
-  private readonly hitMarker = new HitMarker();
-  private readonly pause = new PauseController();
-  private readonly menu = new MainMenu(this.pause);
-  private lastRenderMs = 16.67;
-  private readonly dropIndicator = new DropIndicator(this.world, this.playerEntity);
+  public world: World;
+  public mainLoop: MainLoop;
+  public playerId: string;
+  public isRunning = false;
+  public gameTime = 0;
 
-  private keyHandler = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      if (this.pause.isPaused()) { this.pause.resume(); this.menu.hide(); }
-      else { this.pause.pause(); this.menu.show(); }
-    }
-  };
+  // Systems
+  private playerSystem: PlayerSystem;
+  private weaponSystem: WeaponSystem;
+
+  // Game state
+  private playerCount = 0;
+  private maxPlayers = 100;
+  private gameState: 'lobby' | 'playing' | 'ended' = 'lobby';
 
   constructor() {
-    const noVfx = getFlag('noVFX', false);
-    const noHud = getFlag('noHUD', false);
-    const botCount = Number.parseInt(getString('bots', '5')) || 5;
-
-    registerGameComponents(this.world);
-    this.scheduler = new Scheduler({ world: this.world });
-
-    // Entities and systems
-    this.playerEntity = createPlayer(this.world);
-    this.scheduler.add(createSpawnSystem(botCount));
-    const inputSystem = createInputSystem(this.playerEntity, () => input.snapshot());
-    this.scheduler.add(inputSystem);
-    this.scheduler.add(createWeaponSystem(this.playerEntity));
-    this.scheduler.add(createPerceptionSystem());
-    this.scheduler.add(createAISystem());
-    this.scheduler.add(CharacterControllerSystem);
-    this.scheduler.add(MovementSystem);
-    this.scheduler.add(createGravitySystem());
-    this.scheduler.add(createHealthRegenSystem());
-    this.scheduler.add(createSpawnPhaseSystem());
-
-    // Renderer
-    this.renderer.init();
-
-    // Terrain mesh
-    const data = generateFlatShadedGrid(64, 64, 1, getTerrainSeed());
-    const mesh = buildTerrainMesh(data);
-    this.renderer.getScene().add(mesh);
-
-    // Visibility and LOD for terrain
-    const center = new THREE.Vector3((data.width * data.scale) / 2, 0, (data.depth * data.scale) / 2);
-    const radius = Math.hypot(center.x, center.z);
-    this.scheduler.add(createVisibilitySystem(this.renderer, [{ mesh, center, radius }]));
-    const chunk = createSingleChunk(mesh, data.width, data.depth, data.scale);
-    this.scheduler.add(createTerrainLodSystem(this.renderer, [chunk], () => this.lastRenderMs));
-
-    // Camera + optional VFX
-    this.scheduler.add(createCameraSystem(this.playerEntity, this.renderer));
-    if (!noVfx) {
-      this.scheduler.add(createScreenShakeSystem(this.renderer));
-      this.scheduler.add(createMuzzleFlashSystem(this.renderer));
-    }
-
-    // Loop
-    this.loop = new MainLoop({
-      update: (dt) => { if (!this.pause.isPaused()) this.scheduler.update(dt); },
-      render: () => {
-        const t0 = performance.now();
-        const fps = this.profiler.tick();
-        const health = this.world.get<{ hp: number; max: number }>(this.playerEntity, 'Health');
-        if (health && !noHud) this.hud.state.set({ health: Math.round(health.hp), maxHealth: health.max, fps });
-        this.dropIndicator.update();
-        this.renderer.render();
-        const t1 = performance.now();
-        this.lastRenderMs = Math.max(1, t1 - t0);
-      },
-      fixedDeltaSeconds: 1 / 60
-    });
-
-    // Mount UI conditionally
-    if (typeof window !== 'undefined' && !noHud) {
-      this.hud.mount(document.body);
-      this.profiler.mount(document.body);
-      this.killFeed.mount(document.body);
-      this.damageNumbers.mount(document.body);
-      this.hitMarker.mount(document.body);
-      this.dropIndicator.mount(document.body);
-    }
-
-    // Menu starts visible (paused)
-    this.pause.pause();
-    if (typeof window !== 'undefined') this.menu.mount(document.body);
+    this.world = new World();
+    this.mainLoop = new MainLoop();
+    this.playerId = uuidv4();
+    
+    // Initialize systems
+    this.playerSystem = new PlayerSystem();
+    this.weaponSystem = new WeaponSystem();
+    
+    this.setupSystems();
+    this.setupGameLoop();
   }
 
+  /**
+   * Start the game
+   */
   start(): void {
-    if (typeof window !== 'undefined') {
-      input.attach(window);
-      initErrorTracking();
-      initRUM();
-      initTelemetry();
-      window.addEventListener('keydown', this.keyHandler);
-    }
-    this.loop.start();
+    if (this.isRunning) return;
+
+    console.log('Starting Nexus Royale...');
+    this.isRunning = true;
+    this.gameState = 'lobby';
+    
+    // Start the main loop
+    this.mainLoop.start();
+    
+    // Create initial game world
+    this.createInitialWorld();
+    
+    console.log('Nexus Royale started successfully');
   }
 
+  /**
+   * Stop the game
+   */
   stop(): void {
-    this.loop.stop();
-    if (typeof window !== 'undefined') {
-      input.detach(window);
-      window.removeEventListener('keydown', this.keyHandler);
-      this.hud.unmount();
-      this.profiler.unmount();
-      this.killFeed.unmount();
-      this.damageNumbers.unmount();
-      this.hitMarker.unmount();
-      this.dropIndicator.unmount();
-      this.menu.unmount();
-    }
-    this.renderer.dispose();
+    if (!this.isRunning) return;
+
+    console.log('Stopping Nexus Royale...');
+    this.isRunning = false;
+    this.mainLoop.stop();
+    
+    // Clean up
+    this.world.clear();
+    
+    console.log('Nexus Royale stopped');
   }
 
-  get playerId(): number { return this.playerEntity; }
+  /**
+   * Setup all game systems
+   */
+  private setupSystems(): void {
+    // Add systems to world
+    this.world.addSystem(this.playerSystem);
+    this.world.addSystem(this.weaponSystem);
+    
+    console.log('Game systems initialized');
+  }
+
+  /**
+   * Setup the main game loop
+   */
+  private setupGameLoop(): void {
+    this.mainLoop.setUpdateCallback((deltaTime: number) => {
+      this.update(deltaTime);
+    });
+    
+    this.mainLoop.setRenderCallback(() => {
+      this.render();
+    });
+  }
+
+  /**
+   * Update game logic
+   */
+  private update(deltaTime: number): void {
+    if (!this.isRunning) return;
+
+    this.gameTime += deltaTime;
+
+    // Update world (ECS systems)
+    this.world.update(deltaTime);
+
+    // Update game state
+    this.updateGameState(deltaTime);
+
+    // Handle game events
+    this.handleGameEvents();
+  }
+
+  /**
+   * Render the game
+   */
+  private render(): void {
+    if (!this.isRunning) return;
+
+    // Render logic will be handled by the renderer system
+    // This is just a placeholder for now
+  }
+
+  /**
+   * Update game state
+   */
+  private updateGameState(deltaTime: number): void {
+    switch (this.gameState) {
+      case 'lobby':
+        this.updateLobby(deltaTime);
+        break;
+      case 'playing':
+        this.updatePlaying(deltaTime);
+        break;
+      case 'ended':
+        this.updateEnded(deltaTime);
+        break;
+    }
+  }
+
+  /**
+   * Update lobby state
+   */
+  private updateLobby(deltaTime: number): void {
+    // Check if enough players to start
+    const alivePlayers = this.playerSystem.getAlivePlayerCount();
+    
+    if (alivePlayers >= 2) {
+      // Start the game after a short delay
+      if (this.gameTime > 5) { // 5 second lobby
+        this.startGame();
+      }
+    }
+  }
+
+  /**
+   * Update playing state
+   */
+  private updatePlaying(deltaTime: number): void {
+    // Check win conditions
+    const alivePlayers = this.playerSystem.getAlivePlayerCount();
+    
+    if (alivePlayers <= 1) {
+      this.endGame();
+    }
+  }
+
+  /**
+   * Update ended state
+   */
+  private updateEnded(deltaTime: number): void {
+    // Handle game end state
+    // Could restart after a delay, show results, etc.
+  }
+
+  /**
+   * Handle game events
+   */
+  private handleGameEvents(): void {
+    // Handle various game events
+    // This will be expanded as we add more systems
+  }
+
+  /**
+   * Start the actual game
+   */
+  private startGame(): void {
+    console.log('Starting battle royale match...');
+    this.gameState = 'playing';
+    
+    // Spawn all players
+    this.spawnAllPlayers();
+    
+    // Start the battle royale mechanics
+    this.startBattleRoyaleMechanics();
+  }
+
+  /**
+   * End the game
+   */
+  private endGame(): void {
+    console.log('Battle royale match ended');
+    this.gameState = 'ended';
+    
+    // Handle end game logic
+    this.handleEndGame();
+  }
+
+  /**
+   * Create initial game world
+   */
+  private createInitialWorld(): void {
+    // Create terrain
+    this.createTerrain();
+    
+    // Create initial players (bots for now)
+    this.createInitialPlayers();
+    
+    // Create initial weapons and items
+    this.createInitialItems();
+  }
+
+  /**
+   * Create terrain
+   */
+  private createTerrain(): void {
+    // Create basic terrain
+    // This will be expanded with proper terrain generation
+    console.log('Creating terrain...');
+  }
+
+  /**
+   * Create initial players
+   */
+  private createInitialPlayers(): void {
+    // Create local player
+    this.createPlayer(this.playerId, 'Player', false);
+    
+    // Create AI bots
+    for (let i = 0; i < 23; i++) { // 24 total players (1 human + 23 bots)
+      const botId = uuidv4();
+      const botName = `Bot_${i + 1}`;
+      this.createPlayer(botId, botName, true);
+    }
+    
+    this.playerCount = 24;
+    console.log(`Created ${this.playerCount} players`);
+  }
+
+  /**
+   * Create a player entity
+   */
+  createPlayer(id: string, name: string, isBot: boolean): Entity {
+    const entity = this.world.createEntity();
+    
+    // Add player component
+    const player = new Player(id, name, isBot);
+    if (id === this.playerId) {
+      player.isLocalPlayer = true;
+    }
+    this.world.addComponent(entity, Player.getType(), player);
+    
+    // Add transform component
+    const spawnPosition = this.getRandomSpawnPosition();
+    const transform = new Transform(spawnPosition);
+    this.world.addComponent(entity, Transform.getType(), transform);
+    
+    // Add weapon
+    this.givePlayerWeapon(entity, 'pistol');
+    
+    console.log(`Created player: ${name} (${isBot ? 'Bot' : 'Human'}) at ${spawnPosition.toString()}`);
+    
+    return entity;
+  }
+
+  /**
+   * Get random spawn position
+   */
+  private getRandomSpawnPosition(): Vector3 {
+    const mapSize = 1000;
+    const x = (Math.random() - 0.5) * mapSize;
+    const z = (Math.random() - 0.5) * mapSize;
+    const y = 100; // Spawn in the air
+    
+    return new Vector3(x, y, z);
+  }
+
+  /**
+   * Give a player a weapon
+   */
+  givePlayerWeapon(playerEntity: Entity, weaponPreset: string): void {
+    const weaponEntity = this.weaponSystem.createWeaponFromPreset(weaponPreset);
+    
+    if (weaponEntity) {
+      const weapon = this.weaponSystem.getWeapon(weaponEntity);
+      if (weapon) {
+        weapon.isEquipped = true;
+        
+        // Position weapon relative to player
+        const playerTransform = this.world.getComponent<Transform>(playerEntity, Transform.getType());
+        const weaponTransform = this.world.getComponent<Transform>(weaponEntity, Transform.getType());
+        
+        if (playerTransform && weaponTransform) {
+          weaponTransform.position.copy(playerTransform.position);
+        }
+      }
+    }
+  }
+
+  /**
+   * Create initial items
+   */
+  private createInitialItems(): void {
+    // Create weapons, ammo, health packs, etc. scattered around the map
+    console.log('Creating initial items...');
+  }
+
+  /**
+   * Spawn all players
+   */
+  private spawnAllPlayers(): void {
+    // Spawn all players in the game world
+    console.log('Spawning all players...');
+  }
+
+  /**
+   * Start battle royale mechanics
+   */
+  private startBattleRoyaleMechanics(): void {
+    // Start shrinking play area
+    // Start spawning items
+    // Start AI behavior
+    console.log('Battle royale mechanics started');
+  }
+
+  /**
+   * Handle end game
+   */
+  private handleEndGame(): void {
+    // Show results
+    // Calculate scores
+    // Handle rewards
+    console.log('Handling end game...');
+  }
+
+  /**
+   * Get game statistics
+   */
+  getGameStats(): any {
+    return {
+      playerCount: this.playerCount,
+      alivePlayers: this.playerSystem.getAlivePlayerCount(),
+      gameTime: this.gameTime,
+      gameState: this.gameState,
+      entityCount: this.world.getEntityCount()
+    };
+  }
+
+  /**
+   * Get player by ID
+   */
+  getPlayer(id: string): Player | null {
+    return this.playerSystem.getPlayerById(id);
+  }
+
+  /**
+   * Get local player
+   */
+  getLocalPlayer(): Player | null {
+    return this.getPlayer(this.playerId);
+  }
+
+  /**
+   * Fire weapon for local player
+   */
+  fireWeapon(): boolean {
+    const localPlayer = this.getLocalPlayer();
+    if (!localPlayer || !localPlayer.isAlive) return false;
+
+    // Find player's weapon and fire it
+    // This is a simplified version - in a real game you'd have inventory management
+    const equippedWeapons = this.weaponSystem.getEquippedWeapons();
+    
+    for (const weapon of equippedWeapons) {
+      if (weapon.isEquipped) {
+        // Get player transform
+        const entities = this.world.getEntities();
+        for (const entity of entities) {
+          const player = this.world.getComponent<Player>(entity, Player.getType());
+          const transform = this.world.getComponent<Transform>(entity, Transform.getType());
+          
+          if (player && player.id === this.playerId && transform) {
+            return this.weaponSystem.fireWeapon(weapon, transform, this.playerId);
+          }
+        }
+      }
+    }
+    
+    return false;
+  }
 }

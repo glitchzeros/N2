@@ -1,81 +1,233 @@
-import { ComponentStore, Entity } from './Component';
+import { Entity } from './Entity';
+import { Component } from './Component';
+import { System } from './System';
+import { ComponentType } from './ComponentType';
+import { Query } from './Query';
 
+/**
+ * High-performance Entity-Component-System World
+ * Manages entities, components, and systems with data-oriented design
+ */
 export class World {
-  private nextEntityId: number = 1;
-  private readonly alive: Set<Entity> = new Set();
-  private readonly componentStores: Map<string, ComponentStore<unknown>> = new Map();
+  private entities: Map<number, Entity> = new Map();
+  private components: Map<ComponentType, Map<number, Component>> = new Map();
+  private systems: System[] = [];
+  private queries: Map<string, Query> = new Map();
+  private nextEntityId = 1;
+  private entityPool: number[] = [];
+  private componentPools: Map<ComponentType, Component[]> = new Map();
+  private isUpdating = false;
+  private pendingOperations: (() => void)[] = [];
 
+  /**
+   * Create a new entity
+   */
   createEntity(): Entity {
-    const id = this.nextEntityId++ as Entity;
-    this.alive.add(id);
-    return id;
+    const id = this.entityPool.pop() ?? this.nextEntityId++;
+    const entity = new Entity(id);
+    this.entities.set(id, entity);
+    return entity;
   }
 
+  /**
+   * Destroy an entity and recycle its ID
+   */
   destroyEntity(entity: Entity): void {
-    if (!this.alive.has(entity)) return;
-    this.alive.delete(entity);
-    for (const store of this.componentStores.values()) {
-      // stores may or may not have the entity; delete is safe
-      (store as ComponentStore<unknown>).delete(entity);
+    if (this.isUpdating) {
+      this.pendingOperations.push(() => this.destroyEntity(entity));
+      return;
     }
-  }
 
-  isAlive(entity: Entity): boolean { return this.alive.has(entity); }
-
-  registerComponent<T>(name: string, store: ComponentStore<T>): ComponentStore<T> {
-    if (this.componentStores.has(name)) {
-      throw new Error(`Component '${name}' already registered`);
-    }
-    this.componentStores.set(name, store as ComponentStore<unknown>);
-    return store;
-  }
-
-  getStore<T>(name: string): ComponentStore<T> {
-    const s = this.componentStores.get(name);
-    if (!s) throw new Error(`Component store not found: ${name}`);
-    return s as ComponentStore<T>;
-  }
-
-  add<T>(entity: Entity, name: string, value: T): void {
-    this.getStore<T>(name).set(entity, value);
-  }
-
-  remove(entity: Entity, name: string): void {
-    this.getStore<unknown>(name).delete(entity);
-  }
-
-  get<T>(entity: Entity, name: string): T | undefined {
-    return this.getStore<T>(name).get(entity);
-  }
-
-  has(entity: Entity, name: string): boolean {
-    return this.getStore<unknown>(name).has(entity);
-  }
-
-  query(includes: string[], excludes: string[] = []): Entity[] {
-    if (includes.length === 0) return Array.from(this.alive);
-    // Start from the smallest candidate set for efficiency
-    const stores = includes.map((n) => this.getStore<unknown>(n));
-    stores.sort((a, b) => {
-      // heuristic: smaller key count first
-      const aSize = [...a.keys()].length;
-      const bSize = [...b.keys()].length;
-      return aSize - bSize;
-    });
-    const first = stores[0];
-    const result: Entity[] = [];
-    for (const e of first.keys()) {
-      if (!this.alive.has(e)) continue;
-      let ok = true;
-      for (let i = 1; i < stores.length && ok; i++) {
-        if (!stores[i].has(e)) ok = false;
+    const id = entity.id;
+    
+    // Remove all components
+    for (const [componentType, componentMap] of this.components) {
+      const component = componentMap.get(id);
+      if (component) {
+        this.removeComponent(entity, componentType);
       }
-      if (!ok) continue;
-      for (let i = 0; i < excludes.length && ok; i++) {
-        if (this.getStore<unknown>(excludes[i]).has(e)) ok = false;
-      }
-      if (ok) result.push(e);
     }
-    return result;
+
+    // Remove entity and recycle ID
+    this.entities.delete(id);
+    this.entityPool.push(id);
+  }
+
+  /**
+   * Add a component to an entity
+   */
+  addComponent<T extends Component>(entity: Entity, componentType: ComponentType, component: T): void {
+    if (this.isUpdating) {
+      this.pendingOperations.push(() => this.addComponent(entity, componentType, component));
+      return;
+    }
+
+    if (!this.components.has(componentType)) {
+      this.components.set(componentType, new Map());
+    }
+
+    const componentMap = this.components.get(componentType)!;
+    componentMap.set(entity.id, component);
+    
+    // Invalidate queries that include this component type
+    this.invalidateQueries(componentType);
+  }
+
+  /**
+   * Remove a component from an entity
+   */
+  removeComponent(entity: Entity, componentType: ComponentType): void {
+    if (this.isUpdating) {
+      this.pendingOperations.push(() => this.removeComponent(entity, componentType));
+      return;
+    }
+
+    const componentMap = this.components.get(componentType);
+    if (componentMap) {
+      const component = componentMap.get(entity.id);
+      if (component) {
+        // Return component to pool
+        if (!this.componentPools.has(componentType)) {
+          this.componentPools.set(componentType, []);
+        }
+        this.componentPools.get(componentType)!.push(component);
+        
+        componentMap.delete(entity.id);
+        this.invalidateQueries(componentType);
+      }
+    }
+  }
+
+  /**
+   * Get a component from an entity
+   */
+  getComponent<T extends Component>(entity: Entity, componentType: ComponentType): T | null {
+    const componentMap = this.components.get(componentType);
+    if (componentMap) {
+      return (componentMap.get(entity.id) as T) ?? null;
+    }
+    return null;
+  }
+
+  /**
+   * Check if entity has a component
+   */
+  hasComponent(entity: Entity, componentType: ComponentType): boolean {
+    const componentMap = this.components.get(componentType);
+    return componentMap ? componentMap.has(entity.id) : false;
+  }
+
+  /**
+   * Add a system to the world
+   */
+  addSystem(system: System): void {
+    this.systems.push(system);
+    system.world = this;
+  }
+
+  /**
+   * Remove a system from the world
+   */
+  removeSystem(system: System): void {
+    const index = this.systems.indexOf(system);
+    if (index !== -1) {
+      this.systems.splice(index, 1);
+      system.world = null;
+    }
+  }
+
+  /**
+   * Create a query for entities with specific components
+   */
+  createQuery(...componentTypes: ComponentType[]): Query {
+    const key = componentTypes.sort().join(',');
+    
+    if (this.queries.has(key)) {
+      return this.queries.get(key)!;
+    }
+
+    const query = new Query(this, componentTypes);
+    this.queries.set(key, query);
+    return query;
+  }
+
+  /**
+   * Update all systems
+   */
+  update(deltaTime: number): void {
+    this.isUpdating = true;
+
+    // Update all systems
+    for (const system of this.systems) {
+      if (system.enabled) {
+        system.update(deltaTime);
+      }
+    }
+
+    this.isUpdating = false;
+
+    // Process pending operations
+    while (this.pendingOperations.length > 0) {
+      const operation = this.pendingOperations.shift()!;
+      operation();
+    }
+  }
+
+  /**
+   * Get all entities
+   */
+  getEntities(): Entity[] {
+    return Array.from(this.entities.values());
+  }
+
+  /**
+   * Get entity count
+   */
+  getEntityCount(): number {
+    return this.entities.size;
+  }
+
+  /**
+   * Clear all entities and systems
+   */
+  clear(): void {
+    this.entities.clear();
+    this.components.clear();
+    this.systems.length = 0;
+    this.queries.clear();
+    this.pendingOperations.length = 0;
+    this.nextEntityId = 1;
+    this.entityPool.length = 0;
+    this.componentPools.clear();
+  }
+
+  /**
+   * Invalidate queries that include a specific component type
+   */
+  private invalidateQueries(componentType: ComponentType): void {
+    for (const query of this.queries.values()) {
+      if (query.componentTypes.includes(componentType)) {
+        query.invalidate();
+      }
+    }
+  }
+
+  /**
+   * Get component map for a specific type
+   */
+  getComponentMap(componentType: ComponentType): Map<number, Component> | undefined {
+    return this.components.get(componentType);
+  }
+
+  /**
+   * Get a component from pool or create new
+   */
+  getComponentFromPool<T extends Component>(componentType: ComponentType, createFn: () => T): T {
+    if (!this.componentPools.has(componentType)) {
+      this.componentPools.set(componentType, []);
+    }
+
+    const pool = this.componentPools.get(componentType)!;
+    return (pool.pop() as T) ?? createFn();
   }
 }
