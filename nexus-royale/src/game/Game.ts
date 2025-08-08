@@ -2,9 +2,12 @@ import { World } from '@/engine/core/ecs/World';
 import { MainLoop } from '@/engine/MainLoop';
 import { PlayerSystem } from '@/game/systems/PlayerSystem';
 import { WeaponSystem } from '@/game/systems/WeaponSystem';
+import { InputSystem } from '@/game/systems/InputSystem';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
+import { Input } from '@/game/components/Input';
+import { InputManager } from '@/engine/core/input/InputManager';
 import { Vector3 } from '@/engine/core/math/Vector3';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,6 +24,8 @@ export class Game {
   // Systems
   private playerSystem: PlayerSystem;
   private weaponSystem: WeaponSystem;
+  private inputSystem: InputSystem;
+  private inputManager: InputManager;
 
   // Game state
   private playerCount = 0;
@@ -33,8 +38,10 @@ export class Game {
     this.playerId = uuidv4();
     
     // Initialize systems
+    this.inputManager = new InputManager();
     this.playerSystem = new PlayerSystem();
     this.weaponSystem = new WeaponSystem();
+    this.inputSystem = new InputSystem(this.inputManager);
     
     this.setupSystems();
     this.setupGameLoop();
@@ -80,6 +87,7 @@ export class Game {
    */
   private setupSystems(): void {
     // Add systems to world
+    this.world.addSystem(this.inputSystem);
     this.world.addSystem(this.playerSystem);
     this.world.addSystem(this.weaponSystem);
     
@@ -271,6 +279,10 @@ export class Game {
     const transform = new Transform(spawnPosition);
     this.world.addComponent(entity, Transform.getType(), transform);
     
+    // Add input component
+    const input = new Input(id === this.playerId);
+    this.world.addComponent(entity, Input.getType(), input);
+    
     // Add weapon
     this.givePlayerWeapon(entity, 'pistol');
     
@@ -403,5 +415,26 @@ export class Game {
     }
     
     return false;
+  }
+
+  /**
+   * Get input system
+   */
+  getInputSystem(): InputSystem {
+    return this.inputSystem;
+  }
+
+  /**
+   * Get input manager
+   */
+  getInputManager(): InputManager {
+    return this.inputManager;
+  }
+
+  /**
+   * Get input debug info
+   */
+  getInputDebugInfo(): any {
+    return this.inputSystem.getDebugInfo();
   }
 }

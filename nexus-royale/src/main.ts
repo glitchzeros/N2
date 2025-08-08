@@ -69,9 +69,31 @@ export function bootstrap(): void {
       const stats = game.getGameStats();
       status.textContent = `Stats - Players: ${stats.playerCount}, Alive: ${stats.alivePlayers}, Game Time: ${stats.gameTime.toFixed(1)}s, State: ${stats.gameState}`;
     };
+
+    const inputButton = document.createElement('button');
+    inputButton.textContent = 'Show Input';
+    inputButton.style.margin = '0 10px';
+    inputButton.onclick = () => {
+      const inputInfo = game.getInputDebugInfo();
+      if (inputInfo) {
+        status.textContent = `Input - Movement: (${inputInfo.movement.x.toFixed(2)}, ${inputInfo.movement.y.toFixed(2)}), Look: (${inputInfo.look.x.toFixed(2)}, ${inputInfo.look.y.toFixed(2)}), Fire: ${inputInfo.buttons.fire}`;
+      } else {
+        status.textContent = 'No input info available';
+      }
+    };
+
+    const lockButton = document.createElement('button');
+    lockButton.textContent = 'Lock Mouse';
+    lockButton.style.margin = '0 10px';
+    lockButton.onclick = () => {
+      document.body.requestPointerLock();
+      status.textContent = 'Mouse locked - Click to move mouse, WASD to move';
+    };
     
     controls.appendChild(fireButton);
     controls.appendChild(statsButton);
+    controls.appendChild(inputButton);
+    controls.appendChild(lockButton);
     app.appendChild(controls);
 
     // Create game info
@@ -103,7 +125,7 @@ export function bootstrap(): void {
       </ul>
       <p><strong>Next Steps:</strong></p>
       <ul>
-        <li>🎮 Add input system (WASD movement, mouse look)</li>
+        <li>✅ Input system (WASD movement, mouse look)</li>
         <li>🎯 Add projectile physics and collision</li>
         <li>🤖 Add AI behavior and pathfinding</li>
         <li>🌍 Add 3D rendering and terrain</li>
