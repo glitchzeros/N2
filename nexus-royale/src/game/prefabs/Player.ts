@@ -1,5 +1,5 @@
 import type { World } from '@/engine/core/ecs/World';
-import type { Transform, Velocity, InputState, Health, WeaponState } from '@/game/components';
+import type { Transform, Velocity, InputState, Health, WeaponState, SpawnState } from '@/game/components';
 
 export function createPlayer(world: World): number {
   const e = world.createEntity();
@@ -8,5 +8,6 @@ export function createPlayer(world: World): number {
   world.add<InputState>(e, 'InputState', { moveX: 0, moveY: 0, lookX: 0, lookY: 0, fire: false });
   world.add<Health>(e, 'Health', { hp: 100, max: 100, alive: true });
   world.add<WeaponState>(e, 'WeaponState', { cooldown: 0, fireRate: 8, ammo: 100 });
+  world.add<SpawnState>(e, 'SpawnState', { phase: 'queued', timer: 0, spawnX: 0, spawnY: 0, spawnZ: 0 });
   return e;
 }

@@ -8,6 +8,7 @@ export type Health = { hp: number; max: number; alive: boolean };
 export type WeaponState = { cooldown: number; fireRate: number; ammo: number };
 export type Bounds = { minX: number; minY: number; minZ: number; maxX: number; maxY: number; maxZ: number };
 export type AIState = { targetEntity: number | null; mode: 'patrol' | 'combat'; perceptionRange: number };
+export type SpawnState = { phase: 'queued' | 'dropping' | 'active'; timer: number; spawnX: number; spawnY: number; spawnZ: number };
 
 export function registerGameComponents(world: World) {
   const TransformStore = new MapComponentStore<Transform>('Transform');
@@ -17,6 +18,7 @@ export function registerGameComponents(world: World) {
   const WeaponStateStore = new MapComponentStore<WeaponState>('WeaponState');
   const BoundsStore = new MapComponentStore<Bounds>('Bounds');
   const AIStateStore = new MapComponentStore<AIState>('AIState');
+  const SpawnStateStore = new MapComponentStore<SpawnState>('SpawnState');
 
   world.registerComponent('Transform', TransformStore);
   world.registerComponent('Velocity', VelocityStore);
@@ -25,6 +27,7 @@ export function registerGameComponents(world: World) {
   world.registerComponent('WeaponState', WeaponStateStore);
   world.registerComponent('Bounds', BoundsStore);
   world.registerComponent('AIState', AIStateStore);
+  world.registerComponent('SpawnState', SpawnStateStore);
 
-  return { TransformStore, VelocityStore, InputStateStore, HealthStore, WeaponStateStore, BoundsStore, AIStateStore };
+  return { TransformStore, VelocityStore, InputStateStore, HealthStore, WeaponStateStore, BoundsStore, AIStateStore, SpawnStateStore };
 }

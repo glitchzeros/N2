@@ -33,6 +33,7 @@ import { createMuzzleFlashSystem } from '@/game/systems/MuzzleFlashSystem';
 import { getFlag, getString } from '@/config/build/featureFlags';
 import { PauseController } from '@/game/meta/PauseController';
 import { MainMenu } from '@/ui/screens/MainMenu';
+import { createSpawnPhaseSystem } from '@/game/systems/SpawnPhaseSystem';
 
 export class Game {
   readonly world = new World();
@@ -68,6 +69,7 @@ export class Game {
     this.scheduler.add(CharacterControllerSystem);
     this.scheduler.add(MovementSystem);
     this.scheduler.add(createHealthRegenSystem());
+    this.scheduler.add(createSpawnPhaseSystem());
 
     // Renderer
     this.renderer.init();
