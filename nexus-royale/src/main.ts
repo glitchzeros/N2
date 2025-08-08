@@ -2,6 +2,7 @@ import { Game } from '@/game/Game';
 import { registerServiceWorker } from '@/platform/web/ServiceWorkerRegistration';
 import { OptionsPanel } from '@/ui/screens/Options';
 import { InputOptionsPanel } from '@/ui/screens/InputOptions';
+import { AudioOptionsPanel } from '@/ui/screens/AudioOptions';
 
 export function bootstrap(): void {
   const app = document.getElementById('app');
@@ -17,6 +18,8 @@ export function bootstrap(): void {
   options.mount(document.body);
   const inputOptions = new InputOptionsPanel();
   inputOptions.mount(document.body);
+  const audioOptions = new AudioOptionsPanel();
+  audioOptions.mount(document.body);
 }
 
 if (typeof window !== 'undefined') {

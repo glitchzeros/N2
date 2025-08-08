@@ -29,6 +29,7 @@ export function createWeaponSystem(playerEntity: number): System {
 
       const origin = new Vector3(0, 1.5, 0);
       const dir = new Vector3(0, 0, 1);
+      eventBus.emit('muzzle', { origin, dir });
       const hit = hitscan(ctx.world, origin, dir, 100);
       if (hit) {
         const target = hit.entity;
