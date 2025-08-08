@@ -7,6 +7,7 @@ import { PhysicsSystem } from '@/game/systems/PhysicsSystem';
 import { AISystem } from '@/game/systems/AISystem';
 import { Renderer } from '@/engine/renderer/Renderer';
 import { AudioManager } from '@/engine/audio/AudioManager';
+import { NetworkManager } from '@/engine/net/NetworkManager';
 import { Player } from '@/game/components/Player';
 import { Transform } from '@/game/components/Transform';
 import { Weapon } from '@/game/components/Weapon';
@@ -34,6 +35,7 @@ export class Game {
   private aiSystem: AISystem;
   private renderer: Renderer | null = null;
   private audioManager: AudioManager | null = null;
+  private networkManager: NetworkManager | null = null;
   private inputManager: InputManager;
   private physicsWorld: PhysicsWorld;
 
@@ -530,5 +532,28 @@ export class Game {
   getAudioDebugInfo(): any {
     if (!this.audioManager) return null;
     return this.audioManager.getStats();
+  }
+
+  /**
+   * Initialize network manager
+   */
+  async initializeNetworkManager(): Promise<void> {
+    this.networkManager = new NetworkManager();
+    await this.networkManager.initialize();
+  }
+
+  /**
+   * Get network manager
+   */
+  getNetworkManager(): NetworkManager | null {
+    return this.networkManager;
+  }
+
+  /**
+   * Get network debug info
+   */
+  getNetworkDebugInfo(): any {
+    if (!this.networkManager) return null;
+    return this.networkManager.getStats();
   }
 }
