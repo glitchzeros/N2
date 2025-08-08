@@ -24,6 +24,7 @@ import { initErrorTracking } from '@/config/monitoring/error-tracking';
 import { createScreenShakeSystem } from '@/game/systems/ScreenShakeSystem';
 import { HitMarker } from '@/ui/components/HitMarker';
 import { createHealthRegenSystem } from '@/game/systems/HealthRegenSystem';
+import { initTelemetry } from '@/game/meta/analytics/Telemetry';
 
 export class Game {
   readonly world = new World();
@@ -88,6 +89,7 @@ export class Game {
       this.hitMarker.mount(document.body);
       initErrorTracking();
       initRUM();
+      initTelemetry();
     }
     this.loop.start();
   }
