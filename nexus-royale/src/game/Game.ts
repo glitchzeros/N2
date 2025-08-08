@@ -121,4 +121,6 @@ export class Game {
     }
     this.renderer.dispose();
   }
+
+  get playerId(): number { return this.playerEntity; }
 }

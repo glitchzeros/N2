@@ -3,6 +3,7 @@ import { registerServiceWorker } from '@/platform/web/ServiceWorkerRegistration'
 import { OptionsPanel } from '@/ui/screens/Options';
 import { InputOptionsPanel } from '@/ui/screens/InputOptions';
 import { AudioOptionsPanel } from '@/ui/screens/AudioOptions';
+import { AIDifficultyPanel } from '@/ui/screens/AIDifficulty';
 
 export function bootstrap(): void {
   const app = document.getElementById('app');
@@ -20,6 +21,8 @@ export function bootstrap(): void {
   inputOptions.mount(document.body);
   const audioOptions = new AudioOptionsPanel();
   audioOptions.mount(document.body);
+  const aiPanel = new AIDifficultyPanel(game.world, game.playerId);
+  aiPanel.mount(document.body);
 }
 
 if (typeof window !== 'undefined') {
