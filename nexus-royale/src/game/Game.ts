@@ -36,6 +36,7 @@ import { MainMenu } from '@/ui/screens/MainMenu';
 import { createSpawnPhaseSystem } from '@/game/systems/SpawnPhaseSystem';
 import { DropIndicator } from '@/ui/screens/DropIndicator';
 import { getTerrainSeed } from '@/config/experience/Settings';
+import { createGravitySystem } from '@/engine/physics/dynamics/GravitySystem';
 
 export class Game {
   readonly world = new World();
@@ -78,6 +79,7 @@ export class Game {
     this.scheduler.add(createAISystem());
     this.scheduler.add(CharacterControllerSystem);
     this.scheduler.add(MovementSystem);
+    this.scheduler.add(createGravitySystem());
     this.scheduler.add(createHealthRegenSystem());
     this.scheduler.add(createSpawnPhaseSystem());
 
