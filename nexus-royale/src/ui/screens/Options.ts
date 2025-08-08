@@ -1,9 +1,10 @@
 import { applyBaseTheme, setColorBlindMode } from '@/ui/themes/GlitchwaveTheme';
 import { createStorage } from '@/platform/web/Storage';
+import { setReduceMotion, getReduceMotion } from '@/config/experience/Settings';
 
 const STORAGE_KEY = 'nr.accessibility.v1';
 
-type SavedOpts = { highContrast: boolean; colorBlind: 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia' };
+type SavedOpts = { highContrast: boolean; colorBlind: 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia'; reduceMotion: boolean };
 
 export class OptionsPanel {
   private container: HTMLElement | null = null;
@@ -22,7 +23,7 @@ export class OptionsPanel {
     el.style.fontFamily = "'Roboto Mono', monospace";
     el.style.fontSize = '12px';
 
-    const saved = this.storage.get<SavedOpts | null>(STORAGE_KEY, null) ?? { highContrast: false, colorBlind: 'none' };
+    const saved = this.storage.get<SavedOpts | null>(STORAGE_KEY, null) ?? { highContrast: false, colorBlind: 'none', reduceMotion: false };
 
     const hc = document.createElement('label');
     const hcCb = document.createElement('input'); hcCb.type = 'checkbox'; hcCb.style.marginRight = '6px'; hcCb.checked = saved.highContrast;
@@ -38,21 +39,24 @@ export class OptionsPanel {
     sel.value = saved.colorBlind;
     cb.append(document.createTextNode(' Colorblind: '), sel);
 
-    el.append(hc, cb);
+    const rm = document.createElement('label');
+    rm.style.marginLeft = '12px';
+    const rmCb = document.createElement('input'); rmCb.type = 'checkbox'; rmCb.style.marginRight = '6px'; rmCb.checked = saved.reduceMotion;
+    rm.append(rmCb, document.createTextNode('Reduce Motion'));
+
+    el.append(hc, cb, rm);
     parent.appendChild(el);
     this.container = el;
 
     applyBaseTheme(saved.highContrast);
     setColorBlindMode(saved.colorBlind);
+    setReduceMotion(saved.reduceMotion);
 
-    hcCb.addEventListener('change', () => {
-      applyBaseTheme(hcCb.checked);
-      this.storage.set(STORAGE_KEY, { highContrast: hcCb.checked, colorBlind: sel.value as SavedOpts['colorBlind'] });
-    });
-    sel.addEventListener('change', () => {
-      setColorBlindMode(sel.value as SavedOpts['colorBlind']);
-      this.storage.set(STORAGE_KEY, { highContrast: hcCb.checked, colorBlind: sel.value as SavedOpts['colorBlind'] });
-    });
+    const persist = () => this.storage.set(STORAGE_KEY, { highContrast: hcCb.checked, colorBlind: sel.value as SavedOpts['colorBlind'], reduceMotion: rmCb.checked });
+
+    hcCb.addEventListener('change', () => { applyBaseTheme(hcCb.checked); persist(); });
+    sel.addEventListener('change', () => { setColorBlindMode(sel.value as SavedOpts['colorBlind']); persist(); });
+    rmCb.addEventListener('change', () => { setReduceMotion(rmCb.checked); persist(); });
   }
 
   unmount(): void {
